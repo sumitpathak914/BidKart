@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   MapPin, ChevronDown, Bell, Search, SlidersHorizontal, QrCode,
   ChevronRight, Heart, Clock, LayoutGrid, Radio, Store, Users,
@@ -103,7 +104,7 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Hero banner - updated with new theme */}
+        {/* Hero banner */}
         <div 
           className="mx-5 mt-5 overflow-hidden rounded-3xl p-6 text-white shadow-lg"
           style={{ 
@@ -120,12 +121,13 @@ export default function HomePage() {
           <p className="mt-2 text-sm text-blue-100">
             Amazing deals on products from trusted local shops.
           </p>
-          <button 
-            className="mt-4 flex items-center gap-1 rounded-xl px-4 py-2.5 text-sm font-semibold"
+          <Link
+            to="/explore"
+            className="mt-4 inline-flex items-center gap-1 rounded-xl px-4 py-2.5 text-sm font-semibold"
             style={{ backgroundColor: THEME.gold, color: THEME.ink }}
           >
             Explore Auctions <ChevronRight size={16} />
-          </button>
+          </Link>
           <div className="mt-5 flex gap-1.5">
             <span className="h-1.5 w-4 rounded-full" style={{ backgroundColor: THEME.gold }} />
             <span className="h-1.5 w-1.5 rounded-full bg-white/40" />
@@ -134,7 +136,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Category quick links - updated with new theme */}
+        {/* Category quick links */}
         <div className="mx-5 mt-5 grid grid-cols-3 gap-y-5 rounded-3xl bg-white px-4 py-5 shadow-sm shadow-slate-200/70 sm:grid-cols-6">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
@@ -162,18 +164,19 @@ export default function HomePage() {
           })}
         </div>
 
-        {/* Live Auctions - updated with new theme */}
+        {/* Live Auctions */}
         <section className="mt-6">
           <div className="flex items-center justify-between px-5">
             <h3 className="flex items-center gap-1.5 text-base font-bold" style={{ color: THEME.ink }}>
               ⚡ Live Auctions
             </h3>
-            <button 
+            <Link
+              to="/explore"
               className="flex items-center gap-0.5 text-sm font-medium"
               style={{ color: THEME.gold }}
             >
               See All <ChevronRight size={15} />
-            </button>
+            </Link>
           </div>
 
           <div className="mt-3 flex gap-4 overflow-x-auto px-5 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -224,18 +227,19 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Shops Near You - updated with new theme */}
+        {/* Shops Near You */}
         <section className="mt-6">
           <div className="flex items-center justify-between px-5">
             <h3 className="flex items-center gap-1.5 text-base font-bold" style={{ color: THEME.ink }}>
               🏬 Shops Near You
             </h3>
-            <button 
+            <Link
+              to="/explore"
               className="flex items-center gap-0.5 text-sm font-medium"
               style={{ color: THEME.gold }}
             >
               See All <ChevronRight size={15} />
-            </button>
+            </Link>
           </div>
 
           <div className="mt-3 flex gap-4 overflow-x-auto px-5 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -264,7 +268,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Community banner - updated with new theme */}
+        {/* Community banner */}
         <div 
           className="mx-5 mt-6 flex items-center gap-4 rounded-3xl p-4"
           style={{ backgroundColor: THEME.goldSoft }}
@@ -302,12 +306,13 @@ export default function HomePage() {
             <p className="mt-0.5 text-[11px] text-slate-500">
               Connect, share &amp; get the best deals from people near you.
             </p>
-            <button 
-              className="mt-2 flex items-center gap-1 rounded-xl px-3.5 py-2 text-xs font-semibold text-white"
+            <Link
+              to="/explore"
+              className="mt-2 inline-flex items-center gap-1 rounded-xl px-3.5 py-2 text-xs font-semibold text-white"
               style={{ backgroundColor: THEME.ink }}
             >
               Explore Communities <ChevronRight size={13} />
-            </button>
+            </Link>
           </div>
         </div>
       </div>
