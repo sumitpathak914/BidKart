@@ -3,10 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Compass, Plus, MessageCircle, User } from "lucide-react";
 
 const NAV_ITEMS = [
-  { id: "home", label: "Home", icon: Home, path: "/home" },
+  { id: "home", label: "Home", icon: Home, path: "/" },
   { id: "explore", label: "Explore", icon: Compass, path: "/explore" },
   { id: "sell", label: "Sell", icon: Plus, isCenter: true, path: "/sell" },
-  { id: "chat", label: "Chat", icon: MessageCircle, showBadge: true, path: "/chat" },
+  { id: "Community", label: "Community", icon: MessageCircle, showBadge: true, path: "/chat" },
   { id: "profile", label: "Profile", icon: User, path: "/profile" },
 ];
 
