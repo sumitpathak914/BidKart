@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MapPin, ChevronDown, Bell, Search, SlidersHorizontal, QrCode,
   ChevronRight, Heart, Clock, LayoutGrid, Radio, Store, Users,
@@ -38,7 +38,7 @@ const SHOPS = [
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState("all");
-
+const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#F6F5F1] pb-24">
       <div className="mx-auto max-w-md">
@@ -95,13 +95,21 @@ export default function HomePage() {
             />
             <SlidersHorizontal size={16} className="text-slate-400" />
           </div>
-          <button
+          {/* <button
             className="flex h-[52px] w-[70px] flex-col items-center justify-center gap-1 rounded-2xl text-white shadow-md"
             style={{ backgroundColor: THEME.ink }}
           >
             <QrCode size={17} />
             <span className="text-[10px] font-semibold">Scan QR</span>
-          </button>
+          </button> */}
+                  <button
+  className="flex h-[52px] w-[70px] flex-col items-center justify-center gap-1 rounded-2xl text-white shadow-md"
+  style={{ backgroundColor: THEME.ink }}
+  onClick={() => navigate("/scan-qr")}
+>
+  <QrCode size={17} />
+  <span className="text-[10px] font-semibold">Scan QR</span>
+</button>
         </div>
 
         {/* Hero banner */}

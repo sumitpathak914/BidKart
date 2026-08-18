@@ -6,6 +6,7 @@ import BottomNav from "./component/BottomNav";
 import SellPage from "./component/SellPage";
 import CommunityPage from "./component/CommunityPage";
 import ProfilePage from "./component/ProfilePage";
+import QRScannerPage from "./component/QRScannerPage";
 
 
 
@@ -18,7 +19,8 @@ function AppContent() {
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/sell" element={<SellPage />} />
         <Route path="/community" element={<CommunityPage />} />
-         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+         <Route path="/scan-qr" element={<QRScannerPage />} />
         {/* Add other routes */}
         {/* <Route path="/sell" element={<SellPage />} /> */}
         {/* <Route path="/chat" element={<ChatPage />} /> */}
