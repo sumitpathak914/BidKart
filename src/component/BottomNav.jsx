@@ -6,7 +6,7 @@ const NAV_ITEMS = [
   { id: "home", label: "Home", icon: Home, path: "/" },
   { id: "explore", label: "Explore", icon: Compass, path: "/explore" },
   { id: "sell", label: "Sell", icon: Plus, isCenter: true, path: "/sell" },
-  { id: "Community", label: "Community", icon: MessageCircle, showBadge: true, path: "/chat" },
+  { id: "Community", label: "Community", icon: MessageCircle, showBadge: true, path: "/community" },
   { id: "profile", label: "Profile", icon: User, path: "/profile" },
 ];
 

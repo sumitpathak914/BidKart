@@ -4,6 +4,7 @@ import HomePage from "./component/Homepage";
 import ExplorePage from "./component/Explorepage";
 import BottomNav from "./component/BottomNav";
 import SellPage from "./component/SellPage";
+import CommunityPage from "./component/CommunityPage";
 
 
 
@@ -15,6 +16,7 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/sell" element={<SellPage />} />
+        <Route path="/community" element={<CommunityPage />} />
         {/* Add other routes */}
         {/* <Route path="/sell" element={<SellPage />} /> */}
         {/* <Route path="/chat" element={<ChatPage />} /> */}
