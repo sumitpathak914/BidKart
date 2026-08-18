@@ -17,6 +17,7 @@ import {
   Bike,
   Store,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const THEME = {
   ink: "#0F1638",
@@ -131,7 +132,7 @@ function MapPinMarker({ pin }) {
 
 export default function ExplorePage() {
   const [activeFilter, setActiveFilter] = useState("all");
-
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#F6F5F1] pb-24">
       <div className="mx-auto max-w-md">
@@ -322,12 +323,13 @@ export default function ExplorePage() {
                     <p className="flex items-center gap-1 text-[11px] text-slate-400">
                       <MapPin size={11} /> {shop.address}
                     </p>
-                    <button
-                      className="rounded-lg px-3.5 py-1.5 text-[12px] font-semibold text-white"
-                      style={{ backgroundColor: THEME.ink }}
-                    >
-                      View Shop
-                    </button>
+                     <button
+      onClick={() => navigate(`/shop/${shop.id}`)}
+      className="rounded-lg px-3.5 py-1.5 text-[12px] font-semibold text-white"
+      style={{ backgroundColor: THEME.ink }}
+    >
+      View Shop
+    </button>
                   </div>
                 </div>
               </div>
