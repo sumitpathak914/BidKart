@@ -1,38 +1,34 @@
 import {
-  Bell,
-  ChevronDown,
-  ChevronRight,
-  Clock,
-  Heart,
-  LayoutGrid,
-  Loader2,
-  MapPin,
-  QrCode,
-  Radio,
-  Search,
-  ShieldCheck,
-  ShoppingBag,
-  Star as StarIcon,
-  Store,
-  TrendingUp,
-  Users,
-  Zap,
-  Tag,
-  Smartphone,
-  CreditCard,
-  Timer,
-  Flame,
-  Gift,
-  Rocket,
-  ArrowRight,
-  X,
-  CheckCircle,
-  Crown,
-  Store as StoreIcon
+    ArrowRight,
+    Bell,
+    ChevronDown,
+    ChevronRight,
+    Clock,
+    CreditCard,
+    Flame,
+    Gift,
+    Heart,
+    LayoutGrid,
+    Loader2,
+    MapPin,
+    QrCode,
+    Radio,
+    Search,
+    ShieldCheck,
+    ShoppingBag,
+    Smartphone,
+    Star as StarIcon,
+    Store,
+    Tag,
+    Timer,
+    TrendingUp,
+    Users,
+    X,
+    Zap,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import BannerImage from "../assets/banner.png"; // Importing the banner image
 const THEME = {
   ink: "#0F1638",
   gold: "#D9A441",
@@ -153,24 +149,88 @@ const SHOPS = [
 
 // --- NEW DATA: BEST DEALS ---
 const BEST_DEALS = [
-  { id: 1, name: "Premium Cotton Shirt", price: "₹ 899", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&q=80", shop: "Fashion Hub" },
-  { id: 2, name: "Men's Running Shoes", price: "₹ 1,299", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80", shop: "Sport Zone" },
-  { id: 3, name: "Smart Watch Pro", price: "₹ 4,500", image: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=400&q=80", shop: "Electro World" },
-  { id: 4, name: "Classic Jeans", price: "₹ 1,050", image: "https://images.unsplash.com/photo-1542272617-08f0865b947d?w=400&q=80", shop: "Fashion Hub" },
+  {
+    id: 1,
+    name: "Premium Cotton Shirt",
+    price: "₹ 899",
+    image:
+      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&q=80",
+    shop: "Fashion Hub",
+  },
+  {
+    id: 2,
+    name: "Men's Running Shoes",
+    price: "₹ 1,299",
+    image:
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
+    shop: "Sport Zone",
+  },
+  {
+    id: 3,
+    name: "Smart Watch Pro",
+    price: "₹ 4,500",
+    image:
+      "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=400&q=80",
+    shop: "Electro World",
+  },
+  {
+    id: 4,
+    name: "Classic Jeans",
+    price: "₹ 1,050",
+    image:
+      "https://images.unsplash.com/photo-1542272617-08f0865b947d?w=400&q=80",
+    shop: "Fashion Hub",
+  },
 ];
 
 // --- NEW DATA: COUPONS ---
 const COUPONS = [
-  { id: 1, code: "PHONEPAY20", desc: "20% off using PhonePe", icon: Smartphone, color: "#5B4DFF" },
-  { id: 2, code: "SAVE100", desc: "₹100 off on orders above ₹500", icon: CreditCard, color: "#D9A441" },
+  {
+    id: 1,
+    code: "PHONEPAY20",
+    desc: "20% off using PhonePe",
+    icon: Smartphone,
+    color: "#5B4DFF",
+  },
+  {
+    id: 2,
+    code: "SAVE100",
+    desc: "₹100 off on orders above ₹500",
+    icon: CreditCard,
+    color: "#D9A441",
+  },
   { id: 3, code: "DEAL50", desc: "Flat ₹50 off", icon: Tag, color: "#0F1638" },
 ];
 
 // --- NEW DATA: ENDING SOON BIDS ---
 const ENDING_SOON = [
-  { id: 1, title: "Vintage Camera", price: "₹ 1,200", image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80", bids: 5, timeLeft: "10m" },
-  { id: 2, title: "Sony Headphones", price: "₹ 2,500", image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&q=80", bids: 8, timeLeft: "25m" },
-  { id: 3, title: "Gaming Mouse", price: "₹ 800", image: "https://images.unsplash.com/photo-1527814050087-3793815479db?w=400&q=80", bids: 3, timeLeft: "45m" },
+  {
+    id: 1,
+    title: "Vintage Camera",
+    price: "₹ 1,200",
+    image:
+      "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80",
+    bids: 5,
+    timeLeft: "10m",
+  },
+  {
+    id: 2,
+    title: "Sony Headphones",
+    price: "₹ 2,500",
+    image:
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&q=80",
+    bids: 8,
+    timeLeft: "25m",
+  },
+  {
+    id: 3,
+    title: "Gaming Mouse",
+    price: "₹ 800",
+    image:
+      "https://images.unsplash.com/photo-1527814050087-3793815479db?w=400&q=80",
+    bids: 3,
+    timeLeft: "45m",
+  },
 ];
 
 export default function HomePage() {
@@ -205,7 +265,7 @@ export default function HomePage() {
 
           if (data && data.address) {
             const addr = data.address;
-            
+
             const fullAddressParts = [
               addr.road,
               addr.neighbourhood,
@@ -213,7 +273,7 @@ export default function HomePage() {
               addr.city_district,
               addr.city,
               addr.state,
-              addr.country
+              addr.country,
             ].filter(Boolean);
 
             const fullAddress = fullAddressParts.join(", ");
@@ -239,16 +299,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#F8F7F4] pb-24 relative">
-      
       {/* ============================================ */}
       {/* --- DIRECT SCREEN MODAL FOR BRAND PROMOTION --- */}
       {/* ============================================ */}
       {showPromoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up relative">
-            
             {/* Close 'X' Button */}
-            <button 
+            <button
               onClick={() => setShowPromoModal(false)}
               className="absolute top-4 right-4 z-10 p-1 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
             >
@@ -256,15 +314,16 @@ export default function HomePage() {
             </button>
 
             {/* Modal Banner / Header */}
-            <div className="relative p-6 text-white text-center"
+            <div
+              className="relative p-6 text-white text-center "
               style={{
-                background: `linear-gradient(135deg, ${THEME.ink} 0%, #1a2a5c 100%)`
+                background: `linear-gradient(135deg, ${THEME.ink} 0%, #1a2a5c 100%)`,
               }}
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
               <div className="absolute bottom-0 left-0 w-20 h-20 bg-[#D9A441]/10 rounded-full -ml-10 -mb-10"></div>
-              
-              <div className="relative z-10 flex flex-col items-center">
+
+              {/* <div className="relative z-10 flex flex-col items-center">
                 <div className="w-16 h-16 bg-[#D9A441] rounded-full flex items-center justify-center mb-3 shadow-lg shadow-[#D9A441]/30">
                   <Rocket size={32} className="text-white" />
                 </div>
@@ -272,12 +331,23 @@ export default function HomePage() {
                 <p className="text-sm text-white/80 mt-1 max-w-[250px]">
                   Reach thousands of customers instantly
                 </p>
-              </div>
+              </div> */}
             </div>
 
             {/* Modal Body (Benefits) */}
-            <div className="p-6 space-y-4">
-              <div className="space-y-3">
+            <div className="p-6 space-y-4 h-[600px]">
+              {/* --- NEW: PROMOTION IMAGE FROM ASSETS --- */}
+             
+                <img
+                  src={BannerImage}
+                  alt="Promotion"
+                  className="w-full h-full object-cover"
+                  // Fallback image in case local image is missing
+                />
+            
+              {/* -------------------------------------------------- */}
+
+              {/* <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="p-1.5 bg-blue-50 rounded-lg">
                     <StoreIcon size={18} className="text-blue-600" />
@@ -302,18 +372,18 @@ export default function HomePage() {
                   </div>
                   <p className="text-[13px] font-medium text-slate-700">Connect with communities effortlessly</p>
                 </div>
-              </div>
+              </div> */}
 
               <div className="pt-4 border-t border-slate-100 flex gap-3">
                 {/* Close Button */}
-                <button 
+                {/* <button
                   onClick={() => setShowPromoModal(false)}
                   className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors"
                 >
                   Maybe Later
-                </button>
+                </button> */}
                 {/* Promote Now Button */}
-                <button 
+                {/* <button
                   onClick={() => {
                     setShowPromoModal(false);
                     navigate("/profile"); // Navigates to profile to switch to business
@@ -322,15 +392,13 @@ export default function HomePage() {
                   style={{ backgroundColor: THEME.ink }}
                 >
                   Promote Now <ArrowRight size={18} />
-                </button>
+                </button> */}
               </div>
             </div>
-
           </div>
         </div>
       )}
       {/* ============================================ */}
-
 
       <div className="mx-auto max-w-md">
         {/* --- PREMIUM HEADER --- */}
@@ -362,7 +430,10 @@ export default function HomePage() {
                     <span className="text-base font-bold leading-tight whitespace-normal break-words">
                       {locationText}
                     </span>
-                    <ChevronDown size={16} className="text-slate-400 flex-shrink-0 mt-1" />
+                    <ChevronDown
+                      size={16}
+                      className="text-slate-400 flex-shrink-0 mt-1"
+                    />
                   </>
                 )}
               </button>
@@ -640,7 +711,8 @@ export default function HomePage() {
               className="flex items-center gap-2 text-[17px] font-extrabold"
               style={{ color: THEME.ink }}
             >
-              <Flame size={18} style={{ color: THEME.gold }} /> Best Deals In Your Area
+              <Flame size={18} style={{ color: THEME.gold }} /> Best Deals In
+              Your Area
             </h3>
             <Link
               to="/explore"
@@ -653,10 +725,7 @@ export default function HomePage() {
 
           <div className="flex gap-3 overflow-x-auto px-5 pb-2 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {BEST_DEALS.map((deal) => (
-              <div
-                key={deal.id}
-                className="w-40 flex-shrink-0 snap-center"
-              >
+              <div key={deal.id} className="w-40 flex-shrink-0 snap-center">
                 <div className="bg-white rounded-2xl overflow-hidden shadow-md shadow-slate-200/70 ring-1 ring-slate-100/50">
                   <div className="relative h-36 w-full">
                     <img
@@ -691,7 +760,10 @@ export default function HomePage() {
 
         {/* --- NEW SECTION 2: COUPONS & OFFERS --- */}
         <section className="mt-6 px-5">
-          <div className="flex items-center gap-2 text-[17px] font-extrabold mb-3" style={{ color: THEME.ink }}>
+          <div
+            className="flex items-center gap-2 text-[17px] font-extrabold mb-3"
+            style={{ color: THEME.ink }}
+          >
             <Gift size={18} className="text-[#D9A441]" /> Exclusive Coupons
           </div>
           <div className="space-y-3">
@@ -713,8 +785,12 @@ export default function HomePage() {
                       </div>
                       <div>
                         <p className="text-[11px] opacity-90">Use Code</p>
-                        <p className="text-lg font-extrabold tracking-wider">{coupon.code}</p>
-                        <p className="text-[11px] opacity-90 mt-0.5">{coupon.desc}</p>
+                        <p className="text-lg font-extrabold tracking-wider">
+                          {coupon.code}
+                        </p>
+                        <p className="text-[11px] opacity-90 mt-0.5">
+                          {coupon.desc}
+                        </p>
                       </div>
                     </div>
                     <button className="bg-white/20 px-4 py-1.5 rounded-full text-xs font-semibold hover:bg-white/30 transition-colors">
@@ -754,16 +830,26 @@ export default function HomePage() {
               >
                 <div className="relative h-56 w-full overflow-hidden rounded-2xl bg-white shadow-lg shadow-slate-200/70 ring-1 ring-slate-100/50">
                   <div className="h-32 w-full bg-slate-100">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
                     <Clock size={12} /> {item.timeLeft}
                   </div>
                   <div className="p-3">
-                    <p className="text-[14px] font-bold text-[#0F1638]">{item.title}</p>
+                    <p className="text-[14px] font-bold text-[#0F1638]">
+                      {item.title}
+                    </p>
                     <div className="flex items-center justify-between mt-1">
-                      <p className="text-[14px] font-extrabold text-[#D9A441]">{item.price}</p>
-                      <p className="text-[10px] text-slate-500">{item.bids} bids</p>
+                      <p className="text-[14px] font-extrabold text-[#D9A441]">
+                        {item.price}
+                      </p>
+                      <p className="text-[10px] text-slate-500">
+                        {item.bids} bids
+                      </p>
                     </div>
                     <button
                       className="w-full mt-2 py-1.5 rounded-lg text-[10px] font-bold text-white shadow-sm transition-colors hover:opacity-90"
