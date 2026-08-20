@@ -288,13 +288,13 @@ export default function ExplorePage() {
                 className="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
               />
             </div>
-            <button
+            {/* <button
               className="flex h-[52px] w-[68px] flex-col items-center justify-center gap-1 rounded-2xl text-white shadow-md"
               style={{ backgroundColor: THEME.ink }}
             >
               <QrCode size={17} />
               <span className="text-[10px] font-semibold">Scan QR</span>
-            </button>
+            </button> */}
           </div>
         </header>
 

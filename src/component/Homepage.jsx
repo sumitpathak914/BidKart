@@ -412,10 +412,7 @@ export default function HomePage() {
                 </>
               ) : (
                 <>
-                  <button aria-label="Notifications" className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-md shadow-slate-200">
-                    <Bell size={18} style={{ color: THEME.ink }} />
-                    <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white border-2 border-white" style={{ backgroundColor: THEME.gold }}>3</span>
-                  </button>
+              
                   <img src="https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=100&q=80" alt="Profile" className="h-11 w-11 rounded-full object-cover border-2 border-white shadow-md shadow-slate-200" />
                 </>
               )}
