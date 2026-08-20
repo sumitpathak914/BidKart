@@ -29,6 +29,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import BannerImage from "../assets/banner.png"; // Importing the banner image
+
 const THEME = {
   ink: "#0F1638",
   gold: "#D9A441",
@@ -238,8 +239,12 @@ export default function HomePage() {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
-  // --- STATE FOR THE MODAL ---
-  const [showPromoModal, setShowPromoModal] = useState(true);
+  // --- STATE FOR THE MODAL WITH SESSION STORAGE ---
+  // Check if user already closed the modal in this browser session
+  const [showPromoModal, setShowPromoModal] = useState(() => {
+    const isClosed = sessionStorage.getItem('promoClosed');
+    return !isClosed; // If 'promoClosed' exists, return false (don't show). Else true (show).
+  });
 
   const [locationText, setLocationText] = useState("Getting location...");
   const [isLocationLoading, setIsLocationLoading] = useState(true);
@@ -297,6 +302,12 @@ export default function HomePage() {
     );
   }, []);
 
+  // --- FUNCTION TO HANDLE CLOSING THE MODAL ---
+  const handleClosePromoModal = () => {
+    sessionStorage.setItem('promoClosed', 'true'); // Save to session
+    setShowPromoModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F7F4] pb-24 relative">
       {/* ============================================ */}
@@ -307,7 +318,7 @@ export default function HomePage() {
           <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up relative">
             {/* Close 'X' Button */}
             <button
-              onClick={() => setShowPromoModal(false)}
+              onClick={handleClosePromoModal} // UPDATED
               className="absolute top-4 right-4 z-10 p-1 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
             >
               <X size={20} className="text-slate-500" />
@@ -322,77 +333,37 @@ export default function HomePage() {
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
               <div className="absolute bottom-0 left-0 w-20 h-20 bg-[#D9A441]/10 rounded-full -ml-10 -mb-10"></div>
-
-              {/* <div className="relative z-10 flex flex-col items-center">
-                <div className="w-16 h-16 bg-[#D9A441] rounded-full flex items-center justify-center mb-3 shadow-lg shadow-[#D9A441]/30">
-                  <Rocket size={32} className="text-white" />
-                </div>
-                <h2 className="text-2xl font-extrabold">Promote Your Brand!</h2>
-                <p className="text-sm text-white/80 mt-1 max-w-[250px]">
-                  Reach thousands of customers instantly
-                </p>
-              </div> */}
             </div>
 
             {/* Modal Body (Benefits) */}
             <div className="p-6 space-y-4 h-[600px]">
-              {/* --- NEW: PROMOTION IMAGE FROM ASSETS --- */}
-             
-                <img
-                  src={BannerImage}
-                  alt="Promotion"
-                  className="w-full h-full object-cover"
-                  // Fallback image in case local image is missing
-                />
-            
+              {/* --- PROMOTION IMAGE FROM ASSETS --- */}
+              <img
+                src={BannerImage}
+                alt="Promotion"
+                className="w-full h-full object-cover"
+              />
               {/* -------------------------------------------------- */}
-
-              {/* <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-1.5 bg-blue-50 rounded-lg">
-                    <StoreIcon size={18} className="text-blue-600" />
-                  </div>
-                  <p className="text-[13px] font-medium text-slate-700">Showcase your products to local buyers</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="p-1.5 bg-green-50 rounded-lg">
-                    <Crown size={18} className="text-green-600" />
-                  </div>
-                  <p className="text-[13px] font-medium text-slate-700">Get verified and build trust</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="p-1.5 bg-amber-50 rounded-lg">
-                    <TrendingUp size={18} className="text-amber-600" />
-                  </div>
-                  <p className="text-[13px] font-medium text-slate-700">Exclusive analytics & growth tools</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="p-1.5 bg-purple-50 rounded-lg">
-                    <Users size={18} className="text-purple-600" />
-                  </div>
-                  <p className="text-[13px] font-medium text-slate-700">Connect with communities effortlessly</p>
-                </div>
-              </div> */}
 
               <div className="pt-4 border-t border-slate-100 flex gap-3">
                 {/* Close Button */}
-                {/* <button
-                  onClick={() => setShowPromoModal(false)}
+                <button
+                  onClick={handleClosePromoModal} // UPDATED
                   className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors"
                 >
                   Maybe Later
-                </button> */}
+                </button>
                 {/* Promote Now Button */}
-                {/* <button
+                <button
                   onClick={() => {
-                    setShowPromoModal(false);
+                    handleClosePromoModal(); // Close modal first
                     navigate("/profile"); // Navigates to profile to switch to business
                   }}
                   className="flex-[1.5] py-3 rounded-xl text-white font-bold shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-105 active:scale-95"
                   style={{ backgroundColor: THEME.ink }}
                 >
                   Promote Now <ArrowRight size={18} />
-                </button> */}
+                </button>
               </div>
             </div>
           </div>
@@ -514,41 +485,51 @@ export default function HomePage() {
 
         {/* --- HERO BANNER (Premium Glass look) --- */}
         <div
-          className="mx-5 mt-5 overflow-hidden rounded-3xl p-6 text-white shadow-2xl relative"
+          className="mx-5 mt-5 overflow-hidden rounded-3xl relative shadow-2xl min-h-[200px]"
           style={{
-            background: `linear-gradient(145deg, ${THEME.ink} 0%, #243b75 100%)`,
+            // Beautiful Network Image + Dark Overlay Gradient
+            backgroundImage: `linear-gradient(to right, rgba(15, 22, 56, 0.95) 0%, rgba(15, 22, 56, 0.6) 50%, rgba(15, 22, 56, 0.2) 100%), url('https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
           }}
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-          <div className="absolute bottom-0 right-0 w-24 h-24 bg-[#D9A441]/20 rounded-full -mr-12 -mb-12 blur-xl"></div>
-
-          <div className="relative z-10 flex justify-between items-start">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-md px-3 py-1 text-[11px] font-semibold border border-white/10">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              LIVE NOW
-            </span>
-            <TrendingUp size={20} className="text-white/30" />
-          </div>
-
-          <h2 className="relative z-10 mt-3 text-2xl font-extrabold leading-tight">
-            Bid. Win. <span style={{ color: THEME.gold }}>Repeat.</span>
-          </h2>
-          <p className="relative z-10 mt-1 text-sm text-blue-100/80 font-medium">
-            Exclusive auctions from verified local sellers.
-          </p>
-
-          <div className="relative z-10 mt-5 flex items-center gap-3">
-            <Link
-              to="/explore"
-              className="inline-flex items-center gap-1 rounded-xl bg-white px-5 py-2.5 text-sm font-extrabold shadow-lg transition-transform hover:scale-105 active:scale-95"
-              style={{ color: THEME.ink }}
-            >
-              Explore Now <ChevronRight size={18} />
-            </Link>
-            <div className="flex items-center gap-1 text-[11px] text-white/60 font-medium">
-              <ShieldCheck size={14} className="text-emerald-400" /> Safe
-              Bidding
+          {/* Content Container */}
+          <div className="relative z-10 p-6 py-10 flex flex-col gap-4">
+            
+            {/* Tag with Glass Effect */}
+            <div className="self-start flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md px-4 py-1.5 border border-white/20 shadow-lg">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[11px] font-bold text-white tracking-wide">LIVE AUCTIONS</span>
             </div>
+
+            {/* Main Heading */}
+            <div>
+              <h2 className="text-3xl font-black text-white leading-tight">
+                Bid. Win. <span style={{ color: THEME.gold }}>Repeat.</span>
+              </h2>
+              <p className="mt-1 text-sm text-white/80 font-medium max-w-[80%]">
+                Discover exclusive items from verified local sellers near you.
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex flex-wrap items-center gap-3 mt-2">
+              <Link
+                to="/explore"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-extrabold shadow-lg transition-transform hover:scale-105 active:scale-95"
+                style={{ color: THEME.ink }}
+              >
+                Explore Now <ChevronRight size={18} />
+              </Link>
+              
+              <div className="flex items-center gap-1.5 text-[11px] text-white/80 font-medium bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
+                <ShieldCheck size={14} className="text-emerald-400" /> Secure Bidding
+              </div>
+            </div>
+
+            {/* Decorative Accent Line */}
+            <div className="absolute bottom-6 right-6 w-24 h-1 rounded-full bg-gradient-to-r from-transparent to-[#D9A441]/50 opacity-50"></div>
+            <div className="absolute top-6 right-6 w-32 h-32 bg-[#D9A441]/5 rounded-full blur-2xl"></div>
           </div>
         </div>
 
