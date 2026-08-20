@@ -505,7 +505,7 @@ export default function HomePage() {
                 <p className="mt-1 text-sm text-white/80 font-medium max-w-[80%]">Discover exclusive items from verified local sellers near you.</p>
               </div>
               <div className="flex flex-wrap items-center gap-3 mt-2">
-                <Link to="/explore" className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-extrabold shadow-lg transition-transform hover:scale-105 active:scale-95" style={{ color: THEME.ink }}>Explore Now <ChevronRight size={18} /></Link>
+                <Link to="/all-auctions" className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-extrabold shadow-lg transition-transform hover:scale-105 active:scale-95" style={{ color: THEME.ink }}>Explore Now <ChevronRight size={18} /></Link>
                 <div className="flex items-center gap-1.5 text-[11px] text-white/80 font-medium bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
                   <ShieldCheck size={14} className="text-emerald-400" /> Secure Bidding
                 </div>
@@ -552,7 +552,7 @@ export default function HomePage() {
                         <span className="rounded-lg bg-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-lg shadow-red-500/30">LIVE</span>
                         <span className="flex items-center gap-1 rounded-lg bg-black/60 backdrop-blur-md px-2.5 py-1 text-[10px] font-medium text-white"><Clock size={12} /> {item.timeLeft}</span>
                       </div>
-                      <button className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-md shadow-md hover:bg-white transition-colors"><Heart size={15} className="text-slate-600" /></button>
+                      {/* <button className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-md shadow-md hover:bg-white transition-colors"><Heart size={15} className="text-slate-600" /></button> */}
                       <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-white text-[10px]"><Users size={12} /> {item.watching} watching</div>
                     </div>
                     <div className="p-4 flex flex-col h-[112px] justify-between">
