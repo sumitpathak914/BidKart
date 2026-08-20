@@ -658,6 +658,8 @@ export default function ProfilePage() {
                 navigate("/bidding-dashboard"); // <-- Add this line
               } else if (option.id === "settings") {
                 navigate("/settings"); // <-- Add this line
+              } else if (option.id === "help") {
+                navigate("/help"); // <-- Add this line
               }
               // ------------------------------------
             }}

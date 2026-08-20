@@ -20,6 +20,7 @@ import SellPage from "./component/SellPage";
 import ShopDetailsPage from "./component/ShopDetailsPage";
 import KycPage from "./component/KycPage";
 import SettingsPage from "./component/SettingsPage";
+import HelpAndSupportPage from "./component/HelpAndSupportPage";
 
 // Helper component to conditionally show the BottomNav
 function LayoutWithBottomNav() {
@@ -68,6 +69,7 @@ function LayoutWithBottomNav() {
         />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/my-listings" element={<MyListingsPage />} />
+        <Route path="/help" element={<HelpAndSupportPage />} />
         <Route
           path="/my-listing-details/:listingId"
           element={<MyListingDetailsPage />}
