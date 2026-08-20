@@ -18,6 +18,7 @@ import ProfilePage from "./component/ProfilePage";
 import QRScannerPage from "./component/QRScannerPage";
 import SellPage from "./component/SellPage";
 import ShopDetailsPage from "./component/ShopDetailsPage";
+import KycPage from "./component/KycPage";
 
 // Helper component to conditionally show the BottomNav
 function LayoutWithBottomNav() {
@@ -69,6 +70,7 @@ function LayoutWithBottomNav() {
           path="/my-listing-details/:listingId"
           element={<MyListingDetailsPage />}
         />
+        <Route path="/kyc" element={<KycPage />} />
         <Route path="/my-community" element={<MyCommunityPage />} />
         <Route path="/my-customers" element={<MyCustomersPage />} />
         <Route path="/my-stock" element={<MyStockPage />} />

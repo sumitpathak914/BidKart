@@ -1,7 +1,6 @@
 import {
     ArrowRight,
     BadgeCheck,
-    Bell,
     Boxes,
     CheckCircle,
     Check as CheckIcon,
@@ -11,6 +10,7 @@ import {
     Edit2,
     Gavel,
     HelpCircle,
+    IdCard,
     List,
     LogOut,
     Mail,
@@ -19,18 +19,19 @@ import {
     Phone,
     QrCode,
     Settings,
-    Share2,
+    Share2, // Added for KYC
+    ShieldAlert,
     ShoppingBag,
     Star,
     Store,
-    TrendingUp,
-    Trophy,
+    TrendingUp, // Added for KYC
+    Upload,
     User,
     UserCircle,
     Users,
     Users2,
     X,
-    Zap,
+    Zap
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useRef, useState } from "react";
@@ -60,6 +61,17 @@ export default function ProfilePage() {
   const [copied, setCopied] = useState(false);
   const qrRef = useRef(null);
   const navigate = useNavigate();
+
+  // --- NEW: State for KYC Modal ---
+  const [showKycModal, setShowKycModal] = useState(false);
+  const [isKycVerified, setIsKycVerified] = useState(false); // false = Pending, true = Verified
+  const [kycForm, setKycForm] = useState({
+    aadhaar: "",
+    pan: "",
+    accountNumber: "",
+    passbookImage: "",
+  });
+
   const businessProfile = {
     id: 1,
     name: "Cycle World Nashik",
@@ -96,7 +108,6 @@ export default function ProfilePage() {
       desc: "Manage and track your listed items",
       count: 78,
     },
-
     // --- NEW: Shop QR Code Tool ---
     {
       id: "qrcode",
@@ -105,7 +116,14 @@ export default function ProfilePage() {
       desc: "Generate & download QR code for your shop",
       count: null,
     },
-
+    // --- NEW: KYC VERIFICATION TOOL ---
+    {
+      id: "kyc",
+      label: "KYC Verification",
+      icon: ShieldAlert,
+      desc: "Verify your identity to sell products",
+      count: null,
+    },
     {
       id: "community",
       label: "My Community",
@@ -143,14 +161,6 @@ export default function ProfilePage() {
       desc: "My Bids - Items you have placed bids on",
       count: 24,
     },
-    // {
-    //   id: "won",
-    //   label: "Won Auctions",
-    //   icon: Trophy,
-    //   desc: "Items you have won",
-    //   count: 12,
-    // },
-
     {
       id: "settings",
       label: "Settings",
@@ -164,6 +174,172 @@ export default function ProfilePage() {
       desc: "Get help and contact support",
     },
   ];
+
+  // --- KYC Form Handlers ---
+  const handleKycImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setKycForm({ ...kycForm, passbookImage: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleKycSubmit = (e) => {
+    e.preventDefault();
+    if (
+      !kycForm.aadhaar ||
+      !kycForm.pan ||
+      !kycForm.accountNumber ||
+      !kycForm.passbookImage
+    ) {
+      alert("Please fill all KYC details and upload passbook image.");
+      return;
+    }
+    alert("KYC documents submitted successfully! Verification is pending.");
+    setIsKycVerified(false); // Pending
+    setShowKycModal(false);
+    setKycForm({ aadhaar: "", pan: "", accountNumber: "", passbookImage: "" });
+  };
+
+  // --- Render KYC Modal ---
+  const renderKycModal = () => (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+      <div className="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-slide-up relative p-6">
+        {/* Close Button */}
+        <button
+          onClick={() => setShowKycModal(false)}
+          className="absolute top-4 right-4 p-1 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
+        >
+          <X size={20} className="text-slate-500" />
+        </button>
+
+        <div className="flex items-center gap-3 mb-4 pt-2">
+          <div className="p-2 bg-[#FDF3E1] rounded-lg">
+            <IdCard size={24} className="text-[#D9A441]" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-[#0F1638]">
+              {isKycVerified ? "KYC Verified" : "KYC Verification"}
+            </h2>
+            <p className="text-xs text-slate-500">
+              {isKycVerified
+                ? "Your account is fully verified"
+                : "Complete your KYC to unlock selling features"}
+            </p>
+          </div>
+        </div>
+
+        {/* Status Badge */}
+        {isKycVerified ? (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4 flex items-center gap-2">
+            <CheckCircle size={18} className="text-green-600" />
+            <p className="text-sm font-bold text-green-700">
+              Verified! You can now sell products.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center gap-2">
+            <Clock size={18} className="text-amber-600" />
+            <p className="text-sm font-bold text-amber-700">
+              Pending Verification. Please submit documents.
+            </p>
+          </div>
+        )}
+
+        {!isKycVerified && (
+          <form onSubmit={handleKycSubmit} className="space-y-3">
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600">
+                Aadhaar Card Number
+              </label>
+              <input
+                type="text"
+                placeholder="XXXX XXXX XXXX"
+                required
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
+                value={kycForm.aadhaar}
+                onChange={(e) =>
+                  setKycForm({ ...kycForm, aadhaar: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600">
+                PAN Card Number
+              </label>
+              <input
+                type="text"
+                placeholder="ABCDE1234F"
+                required
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
+                value={kycForm.pan}
+                onChange={(e) =>
+                  setKycForm({ ...kycForm, pan: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600">
+                Bank Account Number
+              </label>
+              <input
+                type="text"
+                placeholder="1234567890"
+                required
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
+                value={kycForm.accountNumber}
+                onChange={(e) =>
+                  setKycForm({ ...kycForm, accountNumber: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600">
+                Upload Passbook Image
+              </label>
+              <div className="flex items-center gap-3">
+                <label className="flex-1 cursor-pointer">
+                  <div className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <Upload size={16} />
+                    <span>Choose Image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleKycImageSelect}
+                    />
+                  </div>
+                </label>
+                {kycForm.passbookImage && (
+                  <div className="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200">
+                    <img
+                      src={kycForm.passbookImage}
+                      alt="Passbook"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-xl text-white font-bold shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-[1.01] active:scale-95"
+              style={{ backgroundColor: THEME.ink }}
+            >
+              Submit for Verification <ArrowRight size={18} />
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
 
   const handleSwitchSubmit = (e) => {
     e.preventDefault();
@@ -278,6 +454,7 @@ export default function ProfilePage() {
       </div>
     </div>
   );
+
   const renderSwitchModal = () => (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
       <div className="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-slide-up">
@@ -406,6 +583,7 @@ export default function ProfilePage() {
       </div>
     </div>
   );
+
   const renderBusinessTools = () => (
     <div className="space-y-3">
       {businessTools.map((tool) => {
@@ -427,9 +605,11 @@ export default function ProfilePage() {
                 navigate("/my-customers"); // <-- Add this line
               } else if (tool.id === "won") {
                 navigate("/my-bids?filter=won"); // Opens MyBidsPage pre-filtered to 'Won'
-              }else if (tool.id === "stock") {
-    navigate("/my-stock"); // <-- Add this line
-}
+              } else if (tool.id === "kyc") {
+                navigate("/kyc"); // Opens KycPage
+              } else if (tool.id === "stock") {
+                navigate("/my-stock"); // <-- Add this line
+              }
               // ------------------------------------
             }}
             className="w-full bg-white rounded-xl p-4 border border-slate-100 text-left hover:shadow-md transition-shadow flex items-center justify-between group"
@@ -461,7 +641,7 @@ export default function ProfilePage() {
     </div>
   );
 
-   const renderAccountOptions = () => (
+  const renderAccountOptions = () => (
     <div className="space-y-3">
       {accountOptions.map((option) => {
         const Icon = option.icon;
@@ -472,7 +652,7 @@ export default function ProfilePage() {
               // --- ADDED NAVIGATION LOGIC FOR PROFILE ---
               if (option.id === "profile") {
                 navigate("/shop/1"); // Navigate to your Shop Details Page (ID: 1)
-              }else if (option.id === "bids") {
+              } else if (option.id === "bids") {
                 navigate("/bidding-dashboard"); // <-- Add this line
               }
               // ------------------------------------
@@ -623,6 +803,7 @@ export default function ProfilePage() {
       {/* Render Modals if visible */}
       {showSwitchModal && renderSwitchModal()}
       {showQrModal && renderQrModal()}
+      {showKycModal && renderKycModal()}
 
       <div className="mx-auto max-w-md">
         <header className="bg-white border-b border-slate-100 px-5 py-4 sticky top-0 z-10">
@@ -632,18 +813,6 @@ export default function ProfilePage() {
               <p className="text-xs text-slate-500">Manage your account</p>
             </div>
             <div className="flex items-center gap-3">
-              {/* <button
-                aria-label="Notifications"
-                className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm"
-              >
-                <Bell size={17} style={{ color: THEME.ink }} />
-                <span
-                  className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                  style={{ backgroundColor: THEME.gold }}
-                >
-                  3
-                </span>
-              </button> */}
               <button className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                 <LogOut size={20} className="text-slate-500" />
               </button>
