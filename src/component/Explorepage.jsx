@@ -1,22 +1,19 @@
-import React, { useState, useEffect } from "react";
 import {
-  MapPin,
-  ChevronDown,
-  Bell,
-  Search,
-  QrCode,
-  Heart,
-  Star as StarIcon,
-  Clock,
-  CheckCircle2,
-  LocateFixed,
-  SlidersHorizontal,
-  Monitor,
-  Shirt,
-  Sofa,
-  Bike,
-  Store,
+    Bike,
+    CheckCircle2,
+    ChevronDown,
+    Heart,
+    LocateFixed,
+    MapPin,
+    Monitor,
+    Search,
+    Shirt,
+    SlidersHorizontal,
+    Sofa,
+    Star as StarIcon,
+    Store
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const THEME = {
@@ -32,13 +29,17 @@ const Shimmer = () => (
 );
 
 const SkeletonBox = ({ className }) => (
-  <div className={`relative overflow-hidden bg-slate-200 rounded-xl ${className}`}>
+  <div
+    className={`relative overflow-hidden bg-slate-200 rounded-xl ${className}`}
+  >
     <Shimmer />
   </div>
 );
 
 const SkeletonText = ({ className }) => (
-  <div className={`relative overflow-hidden bg-slate-200 rounded-full ${className}`}>
+  <div
+    className={`relative overflow-hidden bg-slate-200 rounded-full ${className}`}
+  >
     <Shimmer />
   </div>
 );
@@ -57,7 +58,13 @@ const PINS = [
   { id: 3, name: "Fashion Hub", distance: "0.6 km", top: "34%", left: "10%" },
   { id: 4, name: "Home Style", distance: "0.7 km", top: "38%", left: "52%" },
   { id: 5, name: "Gadget Zone", distance: "1.0 km", top: "52%", left: "82%" },
-  { id: 6, name: "Daily Needs Mart", distance: "0.7 km", top: "68%", left: "8%" },
+  {
+    id: 6,
+    name: "Daily Needs Mart",
+    distance: "0.7 km",
+    top: "68%",
+    left: "8%",
+  },
   { id: 7, name: "Shoppy Store", distance: "1.4 km", top: "78%", left: "38%" },
   { id: 8, name: "Tech House", distance: "1.6 km", top: "72%", left: "70%" },
 ];
@@ -74,7 +81,8 @@ const SHOPS = [
     closes: "9:00 PM",
     address: "Mahatma Nagar, Nashik",
     distance: "0.6 km",
-    image: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80",
+    image:
+      "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80",
   },
   {
     id: 2,
@@ -87,7 +95,8 @@ const SHOPS = [
     closes: "8:30 PM",
     address: "College Road, Nashik",
     distance: "0.8 km",
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80",
+    image:
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80",
   },
   {
     id: 3,
@@ -100,7 +109,8 @@ const SHOPS = [
     closes: "9:00 PM",
     address: "Gangapur Road, Nashik",
     distance: "0.7 km",
-    image: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=400&q=80",
+    image:
+      "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=400&q=80",
   },
   {
     id: 4,
@@ -113,7 +123,8 @@ const SHOPS = [
     closes: "8:00 PM",
     address: "Untwadi Road, Nashik",
     distance: "1.2 km",
-    image: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&q=80",
+    image:
+      "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&q=80",
   },
 ];
 
@@ -258,7 +269,7 @@ export default function ExplorePage() {
               <ChevronDown size={15} className="text-slate-400" />
             </button>
             <div className="flex items-center gap-3">
-              <button
+              {/* <button
                 aria-label="Notifications"
                 className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm shadow-slate-200"
               >
@@ -269,7 +280,7 @@ export default function ExplorePage() {
                 >
                   3
                 </span>
-              </button>
+              </button> */}
               <img
                 src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&q=80"
                 alt="Profile"
@@ -326,10 +337,34 @@ export default function ExplorePage() {
           style={{ backgroundColor: THEME.mapBg }}
         >
           {/* subtle road grid */}
-          <svg className="absolute inset-0 h-full w-full opacity-40" preserveAspectRatio="none">
-            <line x1="0" y1="45%" x2="100%" y2="55%" stroke="#C7D3F0" strokeWidth="10" />
-            <line x1="30%" y1="0" x2="55%" y2="100%" stroke="#C7D3F0" strokeWidth="8" />
-            <line x1="75%" y1="0" x2="60%" y2="100%" stroke="#C7D3F0" strokeWidth="6" />
+          <svg
+            className="absolute inset-0 h-full w-full opacity-40"
+            preserveAspectRatio="none"
+          >
+            <line
+              x1="0"
+              y1="45%"
+              x2="100%"
+              y2="55%"
+              stroke="#C7D3F0"
+              strokeWidth="10"
+            />
+            <line
+              x1="30%"
+              y1="0"
+              x2="55%"
+              y2="100%"
+              stroke="#C7D3F0"
+              strokeWidth="8"
+            />
+            <line
+              x1="75%"
+              y1="0"
+              x2="60%"
+              y2="100%"
+              stroke="#C7D3F0"
+              strokeWidth="6"
+            />
           </svg>
 
           {PINS.map((pin) => (
@@ -369,7 +404,8 @@ export default function ExplorePage() {
               Shops Near You
             </h3>
             <button className="flex items-center gap-1 text-[13px] font-medium text-slate-500">
-              Sort by: <span className="font-semibold text-[#0F1638]">Distance</span>
+              Sort by:{" "}
+              <span className="font-semibold text-[#0F1638]">Distance</span>
               <ChevronDown size={14} />
             </button>
           </div>
@@ -411,14 +447,22 @@ export default function ExplorePage() {
 
                   <span
                     className="mt-1 w-fit rounded-md px-2 py-0.5 text-[11px] font-semibold"
-                    style={{ backgroundColor: THEME.goldSoft, color: THEME.ink }}
+                    style={{
+                      backgroundColor: THEME.goldSoft,
+                      color: THEME.ink,
+                    }}
                   >
                     {shop.category}
                   </span>
 
                   <div className="mt-1.5 flex items-center gap-1 text-[12px] text-slate-600">
-                    <StarIcon size={12} className="fill-[#D9A441] text-[#D9A441]" />
-                    <span className="font-semibold text-[#0F1638]">{shop.rating}</span>
+                    <StarIcon
+                      size={12}
+                      className="fill-[#D9A441] text-[#D9A441]"
+                    />
+                    <span className="font-semibold text-[#0F1638]">
+                      {shop.rating}
+                    </span>
                     <span className="text-slate-400">({shop.reviews})</span>
                   </div>
 
@@ -434,13 +478,13 @@ export default function ExplorePage() {
                     <p className="flex items-center gap-1 text-[11px] text-slate-400">
                       <MapPin size={11} /> {shop.address}
                     </p>
-                     <button
-      onClick={() => navigate(`/shop/${shop.id}`)}
-      className="rounded-lg px-3.5 py-1.5 text-[12px] font-semibold text-white"
-      style={{ backgroundColor: THEME.ink }}
-    >
-      View Shop
-    </button>
+                    <button
+                      onClick={() => navigate(`/shop/${shop.id}`)}
+                      className="rounded-lg px-3.5 py-1.5 text-[12px] font-semibold text-white"
+                      style={{ backgroundColor: THEME.ink }}
+                    >
+                      View Shop
+                    </button>
                   </div>
                 </div>
               </div>
