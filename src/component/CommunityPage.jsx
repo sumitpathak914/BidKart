@@ -34,6 +34,7 @@ import {
   List,
   AlertCircle,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const THEME = {
   ink: "#0F1638",
@@ -49,7 +50,7 @@ export default function CommunityPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCommunity, setSelectedCommunity] = useState(null);
   const [viewMode, setViewMode] = useState("grid");
-
+const navigate = useNavigate();
   const popularCities = [
     { id: 1, name: "Mumbai", state: "Maharashtra", communities: 45 },
     { id: 2, name: "Pune", state: "Maharashtra", communities: 38 },
@@ -361,60 +362,66 @@ export default function CommunityPage() {
           </div>
         </div>
 
-        {/* Communities Grid/List */}
-        <div className={viewMode === "grid" ? "grid grid-cols-1 gap-4" : "space-y-4"}>
+        {/* --- UPDATED 2-COLUMN CLOSE GRID --- */}
+        <div className={viewMode === "grid" ? "grid grid-cols-2 gap-2" : "space-y-2"}>
           {communities.map((community) => (
             <div
               key={community.id}
-              className="bg-white rounded-xl overflow-hidden border border-slate-100 hover:shadow-md transition-shadow"
+              className="bg-white rounded-lg overflow-hidden border border-slate-100 hover:shadow-md transition-shadow"
             >
-              <div className="relative h-32 w-full">
+              {/* Compact Image */}
+              <div className="relative h-24 w-full">
                 <img
                   src={community.image}
                   alt={community.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-3 right-3 flex gap-2">
+                <div className="absolute top-1.5 right-1.5 flex flex-col gap-1">
                   {community.isVerified && (
-                    <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                      <Check size={12} /> Verified
+                    <span className="bg-blue-500 text-white text-[8px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                      <Check size={9} />
                     </span>
                   )}
                   {community.active && (
-                    <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                      Active
+                    <span className="bg-green-500 text-white text-[8px] px-1.5 py-0.5 rounded-full">
+                      Live
                     </span>
                   )}
                 </div>
-                <div className="absolute bottom-3 left-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
-                  📍 {community.location}
+                <div className="absolute bottom-1.5 left-1.5 bg-black/60 backdrop-blur-sm text-white text-[8px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                  <MapPin size={9} /> {community.location}
                 </div>
               </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="font-bold text-[#0F1638]">{community.name}</h4>
-                    <p className="text-sm text-slate-500">{community.category}</p>
+
+              {/* Compact Content */}
+              <div className="p-2.5">
+                <div className="flex items-start justify-between gap-1">
+                  <div className="flex-1">
+                    <h4 className="font-bold text-[#0F1638] text-[13px] truncate">{community.name}</h4>
+                    <p className="text-[10px] text-slate-500 truncate">{community.category}</p>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Star size={16} className="fill-[#D9A441] text-[#D9A441]" />
-                    <span className="text-sm font-semibold text-[#0F1638]">{community.rating}</span>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <Star size={11} className="fill-[#D9A441] text-[#D9A441]" />
+                    <span className="text-[11px] font-semibold text-[#0F1638]">{community.rating}</span>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600 mt-2 line-clamp-2">{community.description}</p>
-                <div className="flex items-center gap-4 mt-3">
-                  <span className="flex items-center gap-1 text-sm text-slate-500">
-                    <Users size={16} /> {community.members.toLocaleString()} members
+                
+                <div className="flex items-center gap-2 mt-1.5 text-[9px] text-slate-500">
+                  <span className="flex items-center gap-0.5">
+                    <Users size={10} /> {community.members > 999 ? `${(community.members/1000).toFixed(1)}k` : community.members}
                   </span>
-                  <span className="flex items-center gap-1 text-sm text-slate-500">
-                    <MessageCircle size={16} /> {community.posts} posts
+                  <span className="flex items-center gap-0.5">
+                    <MessageCircle size={10} /> {community.posts}
                   </span>
                 </div>
-                <button className="w-full mt-3 py-2.5 rounded-lg text-white font-semibold transition-colors hover:opacity-90"
-                  style={{ backgroundColor: THEME.ink }}
-                >
-                  Join Community
-                </button>
+
+               <button 
+  onClick={() => navigate(`/community-chat/${community.id}`)}
+  className="w-full mt-2 py-1.5 rounded-lg text-[10px] font-semibold text-white transition-colors hover:opacity-90"
+  style={{ backgroundColor: THEME.ink }}
+>
+  Join
+</button>
               </div>
             </div>
           ))}
