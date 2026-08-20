@@ -189,7 +189,10 @@ const navigate = useNavigate();
 
           <div className="mt-3 flex gap-4 overflow-x-auto px-5 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {AUCTIONS.map((item) => (
-              <div
+              <Link
+
+
+                     to={`/auction/${item.id}`} // <--- ADD THIS LINE
                 key={item.id}
                 className="w-44 flex-shrink-0 overflow-hidden rounded-2xl bg-white shadow-sm shadow-slate-200/70"
               >
@@ -230,7 +233,7 @@ const navigate = useNavigate();
                     Place Bid
                   </button>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
