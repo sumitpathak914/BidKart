@@ -1,22 +1,22 @@
 import {
-    Bell,
-    ChevronDown,
-    ChevronRight,
-    Clock,
-    Heart,
-    LayoutGrid,
-    Loader2,
-    MapPin,
-    QrCode,
-    Radio,
-    Search,
-    ShieldCheck,
-    ShoppingBag,
-    Star as StarIcon,
-    Store,
-    TrendingUp,
-    Users,
-    Zap,
+  Bell,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Heart,
+  LayoutGrid,
+  Loader2,
+  MapPin,
+  QrCode,
+  Radio,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  Star as StarIcon,
+  Store,
+  TrendingUp,
+  Users,
+  Zap,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -144,12 +144,10 @@ export default function HomePage() {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
-  // --- NEW: State for Location ---
   const [locationText, setLocationText] = useState("Getting location...");
   const [isLocationLoading, setIsLocationLoading] = useState(true);
   const [userCoords, setUserCoords] = useState(null);
 
-  // --- NEW: Get Location Logic ---
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocationText("Location not supported");
@@ -163,33 +161,42 @@ export default function HomePage() {
         setUserCoords({ latitude, longitude });
 
         try {
-          // Using free OpenStreetMap API (Nominatim) to convert coords to address
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&accept-language=en`,
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1&accept-language=en`,
           );
           const data = await response.json();
 
-          if (data && data.display_name) {
-            // Extract City/State from the full address
-            const addressParts = data.display_name.split(",");
-            // Usually the city/state is in the last few parts.
-            // We take the last 2-3 parts to make it look clean
-            const shortAddress =
-              addressParts.slice(-3, -1).join(", ").trim() || "Nashik, India";
-            setLocationText(shortAddress);
+          if (data && data.address) {
+            const addr = data.address;
+            
+            // FULL ADDRESS constructed without cutting anything
+            const fullAddressParts = [
+              addr.road,
+              addr.neighbourhood,
+              addr.suburb,
+              addr.city_district,
+              addr.city,
+              addr.state,
+              addr.country
+            ].filter(Boolean); // Remove empty/null values
+
+            const fullAddress = fullAddressParts.join(", ");
+            
+            // Set the full long address
+            setLocationText(fullAddress);
           } else {
-            setLocationText("Nashik, India"); // Fallback
+            setLocationText("Nashik, Maharashtra, India");
           }
         } catch (error) {
           console.error("Reverse Geocoding Error:", error);
-          setLocationText("Nashik, India"); // Fallback on API error
+          setLocationText("Nashik, Maharashtra, India");
         } finally {
           setIsLocationLoading(false);
         }
       },
       (error) => {
         console.error("Geolocation Error:", error);
-        setLocationText("Nashik, India"); // Fallback if user denies permission
+        setLocationText("Nashik, Maharashtra, India");
         setIsLocationLoading(false);
       },
       { enableHighAccuracy: true },
@@ -215,9 +222,9 @@ export default function HomePage() {
                 </span>
               </div>
 
-              {/* --- UPDATED: Dynamic Location Display --- */}
+              {/* --- FULL ADDRESS DISPLAY (No truncate, allows multiple lines) --- */}
               <button
-                className="mt-0.5 flex items-center gap-1"
+                className="mt-0.5 flex items-start gap-1 max-w-[250px] text-left"
                 style={{ color: THEME.ink }}
               >
                 {isLocationLoading ? (
@@ -226,15 +233,16 @@ export default function HomePage() {
                   </span>
                 ) : (
                   <>
-                    <span className="text-base font-bold truncate max-w-[160px]">
+                    {/* REMOVED truncate, added whitespace-normal to allow full address on 2 lines */}
+                    <span className="text-base font-bold leading-tight whitespace-normal break-words">
                       {locationText}
                     </span>
-                    <ChevronDown size={16} className="text-slate-400" />
+                    <ChevronDown size={16} className="text-slate-400 flex-shrink-0 mt-1" />
                   </>
                 )}
               </button>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-shrink-0">
               <button
                 aria-label="Notifications"
                 className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-md shadow-slate-200"

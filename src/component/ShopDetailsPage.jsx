@@ -1,22 +1,25 @@
 import {
-    ArrowLeft,
-    BadgeCheck,
-    Box,
-    CheckCircle,
-    Clock,
-    Gavel,
-    Heart,
-    MapPin,
-    MessageCircle,
-    Package,
-    Phone,
-    Share2,
-    Shield,
-    ShoppingBag,
-    Star,
-    Store,
-    Tag,
-    Truck,
+  ArrowLeft,
+  BadgeCheck,
+  Box,
+  CheckCircle,
+  Clock,
+  Gavel,
+  Heart,
+  MapPin,
+  MessageCircle,
+  Package,
+  Phone,
+  Share2,
+  Shield,
+  ShoppingBag,
+  Star,
+  Store,
+  Tag,
+  Truck,
+  Users,       // Added
+  UserPlus,    // Added
+  Check        // Added
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -60,7 +63,7 @@ const SHOPS_DB = {
     aboutStats: [
       { icon: Shield, label: "Quality Products", desc: "Premium & durable" },
       { icon: Tag, label: "Best Prices", desc: "Value for money" },
-      { icon: BadgeCheck, label: "Secure Payments", desc: "100% safe" }, // Fixed icon here
+      { icon: BadgeCheck, label: "Secure Payments", desc: "100% safe" },
       { icon: Truck, label: "Fast Delivery", desc: "On time delivery" },
     ],
 
@@ -169,6 +172,7 @@ export default function ShopDetailsPage() {
   const [activeTab, setActiveTab] = useState("portfolio");
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isCommunityJoined, setIsCommunityJoined] = useState(false); // New State
   const [shop, setShop] = useState(null);
 
   // Load data based on URL ID
@@ -307,7 +311,7 @@ export default function ShopDetailsPage() {
         </div>
       </div>
 
-      {/* About the Shop (Stats Section) */}
+      {/* About the Shop (Stats Section + NEW Join Community) */}
       <div>
         <h4 className="font-bold text-[#0F1638] mb-3">About the Shop</h4>
         <div className="grid grid-cols-2 gap-2">
@@ -331,6 +335,11 @@ export default function ShopDetailsPage() {
             );
           })}
         </div>
+
+        {/* --- NEW: Join Community Card --- */}
+       
+        {/* --- End Join Community Card --- */}
+
       </div>
     </div>
   );
@@ -370,7 +379,7 @@ export default function ShopDetailsPage() {
                   {auction.bids} bids
                 </span>
                 <Link
-                  to={`/auction/${item.id}`}
+                  to={`/auction/${auction.id}`}
                   className="mt-2 w-full block text-center rounded-lg py-2 text-xs font-semibold text-white"
                   style={{ backgroundColor: THEME.ink }}
                 >
@@ -516,7 +525,40 @@ export default function ShopDetailsPage() {
             </button>
           </div>
 
-          {/* Stats Row */}
+                  {/* Stats Row */}
+                   <div className="mt-3 bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-[#FDF3E1] rounded-full">
+              <Users size={20} className="text-[#D9A441]" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-[#0F1638]">WoodNest Furniture Community</p>
+              <p className="text-[11px] text-slate-500">
+                {isCommunityJoined 
+                  ? "You are a member of WoodNest Furniture" 
+                  : "Connect with other customers"}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsCommunityJoined(!isCommunityJoined)}
+            className={`px-5 py-2 rounded-lg border text-xs font-semibold transition-all ${
+              isCommunityJoined
+                ? "border-green-500 text-green-600 bg-green-50"
+                : "border-[#5B4DFF] text-[#5B4DFF] bg-white"
+            }`}
+          >
+            {isCommunityJoined ? (
+              <span className="flex items-center gap-1">
+                <Check size={14} /> Joined
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">
+                <UserPlus size={14} /> Join
+              </span>
+            )}
+          </button>
+        </div>
           <div className="grid grid-cols-4 gap-2 mt-4 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
             <div className="text-center border-r border-slate-100 last:border-r-0">
               <div className="flex items-center justify-center gap-1 text-[#0F1638] mb-0.5">
