@@ -369,13 +369,13 @@ export default function ShopDetailsPage() {
         {/* Bottom Fixed Buttons */}
         <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t border-slate-200 shadow-lg">
           <div className="flex gap-3">
-             <button className="flex-1 py-3 rounded-xl border-2 border-[#5B4DFF] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
-               <MessageCircle size={18} /> Message Shop
+             <button className="flex-1 py-2 rounded-xl border-2 border-[#5B4DFF] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
+               <MessageCircle size={18} /> Message 
              </button>
-             <button className="flex-1 py-3 rounded-xl border-2 border-[#5B4DFF] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
+             <button className="flex-1 py-2 rounded-xl border-2 border-[#5B4DFF] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
                <Phone size={18} /> Call Shop
              </button>
-             <button className="flex-[1.5] py-3 rounded-xl text-white font-semibold flex items-center justify-center gap-2 shadow-md" style={{ backgroundColor: "#5B4DFF" }}>
+             <button className="flex-[1.5] py-2 rounded-xl text-white font-semibold flex items-center justify-center gap-2 shadow-md" style={{ backgroundColor: "#5B4DFF" }}>
                <Store size={18} /> Visit Shop
              </button>
           </div>
