@@ -28,6 +28,10 @@ import {
   Mail,
   Phone,
   UserCircle,
+  Users,
+  Boxes,      // For My Stock
+  Users2,     // For My Customers
+  MessageCircle, // For My Community
 } from "lucide-react";
 
 const THEME = {
@@ -67,11 +71,17 @@ export default function ProfilePage() {
     verified: false,
   };
 
+  // --- UPDATED Business Tools with 3 New Options ---
   const businessTools = [
-    { id: "listings", label: "My Auction Listings", icon: List, desc: "Manage and track your listed items" },
-    { id: "bids", label: "Biddings & Purchases", icon: Gavel, desc: "My Bids - Items you have placed bids on" },
-    { id: "won", label: "Won Auctions", icon: Trophy, desc: "Items you have won" },
-    { id: "watchlist", label: "Watchlist", icon: Eye, desc: "Items you are watching" },
+    { id: "listings", label: "My Auction Listings", icon: List, desc: "Manage and track your listed items", count: 78 },
+    { id: "bids", label: "Biddings & Purchases", icon: Gavel, desc: "My Bids - Items you have placed bids on", count: 24 },
+    { id: "won", label: "Won Auctions", icon: Trophy, desc: "Items you have won", count: 12 },
+    { id: "watchlist", label: "Watchlist", icon: Eye, desc: "Items you are watching", count: 45 },
+    
+    // --- NEW ITEMS HERE ---
+    { id: "community", label: "My Community", icon: MessageCircle, desc: "Join & manage local communities", count: 3 },
+    { id: "customers", label: "My Customers", icon: Users2, desc: "View & connect with your customer base", count: 158 },
+    { id: "stock", label: "My Stock", icon: Boxes, desc: "Manage inventory and stock levels", count: 210 },
   ];
 
   const accountOptions = [
@@ -88,17 +98,24 @@ export default function ProfilePage() {
         return (
           <button
             key={tool.id}
-            className="w-full bg-white rounded-xl p-4 border border-slate-100 text-left hover:shadow-md transition-shadow"
+            className="w-full bg-white rounded-xl p-4 border border-slate-100 text-left hover:shadow-md transition-shadow flex items-center justify-between group"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#FDF3E1] rounded-lg">
+              <div className="p-2 bg-[#FDF3E1] rounded-lg group-hover:bg-[#D9A441]/20 transition-colors">
                 <Icon size={20} className="text-[#D9A441]" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-[#0F1638]">{tool.label}</p>
                 <p className="text-xs text-slate-500">{tool.desc}</p>
               </div>
-              <ChevronRight size={18} className="text-slate-400" />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {/* Count Badge */}
+              <span className="px-2 py-1 bg-slate-50 rounded-full text-[10px] font-bold text-[#0F1638] border border-slate-200">
+                {tool.count}
+              </span>
+              <ChevronRight size={18} className="text-slate-300 group-hover:text-[#D9A441] transition-colors" />
             </div>
           </button>
         );
