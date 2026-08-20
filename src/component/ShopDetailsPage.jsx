@@ -372,7 +372,7 @@ export default function ShopDetailsPage() {
              <button className="flex-1 p-2 rounded-xl border-2 border-[#5B4DFF] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
                <MessageCircle size={18} /> Message 
              </button>
-             <button className="flex-1 p-2 rounded-xl border-2 border-[#5B4DFF] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
+             <button className="flex-1 p-2 rounded-xl border-2 border-[rgb(91,77,255)] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
                <Phone size={18} /> Call Shop
              </button>
              <button className="flex-[1.5] p-2 rounded-xl text-white font-semibold flex items-center justify-center gap-2 shadow-md" style={{ backgroundColor: "#5B4DFF" }}>
