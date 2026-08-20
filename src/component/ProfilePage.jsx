@@ -31,7 +31,7 @@ import {
     Users,
     Users2,
     X,
-    Zap
+    Zap,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useRef, useState } from "react";
@@ -609,6 +609,8 @@ export default function ProfilePage() {
                 navigate("/kyc"); // Opens KycPage
               } else if (tool.id === "stock") {
                 navigate("/my-stock"); // <-- Add this line
+              } else if (tool.id === "settings") {
+                navigate("/settings"); // <-- Add this line
               }
               // ------------------------------------
             }}
@@ -654,6 +656,8 @@ export default function ProfilePage() {
                 navigate("/shop/1"); // Navigate to your Shop Details Page (ID: 1)
               } else if (option.id === "bids") {
                 navigate("/bidding-dashboard"); // <-- Add this line
+              } else if (option.id === "settings") {
+                navigate("/settings"); // <-- Add this line
               }
               // ------------------------------------
             }}
