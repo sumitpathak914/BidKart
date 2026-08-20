@@ -625,9 +625,9 @@ export default function ShopDetailsPage() {
         {/* Bottom Fixed Buttons */}
         <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t border-slate-200 shadow-lg">
           <div className="flex gap-2">
-            <button className="flex-1 p-2 rounded-xl border-2 border-[#5B4DFF] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
+            {/* <button className="flex-1 p-2 rounded-xl border-2 border-[#5B4DFF] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
               <MessageCircle size={18} /> Message
-            </button>
+            </button> */}
             <button className="flex-1 p-2 rounded-xl border-2 border-[rgb(91,77,255)] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
               <Phone size={18} /> Call Shop
             </button>
