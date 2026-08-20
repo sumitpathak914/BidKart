@@ -1,11 +1,8 @@
-import {
-  BrowserRouter,
-  Route,
-  Routes,
-  useLocation
-} from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import AllAuctionsPage from "./component/AllAuctionsPage";
 import AuctionDetailsPage from "./component/AuctionDetailsPage";
 import BottomNav from "./component/BottomNav";
+import CommunityChatPage from "./component/CommunityChatPage";
 import CommunityPage from "./component/CommunityPage";
 import ExplorePage from "./component/Explorepage";
 import HomePage from "./component/Homepage";
@@ -13,8 +10,6 @@ import ProfilePage from "./component/ProfilePage";
 import QRScannerPage from "./component/QRScannerPage";
 import SellPage from "./component/SellPage";
 import ShopDetailsPage from "./component/ShopDetailsPage";
-import AllAuctionsPage from "./component/AllAuctionsPage";
-import CommunityChatPage from "./component/CommunityChatPage";
 
 // Helper component to conditionally show the BottomNav
 function LayoutWithBottomNav() {
@@ -25,6 +20,7 @@ function LayoutWithBottomNav() {
     "/scan-qr",
     "/shop", // Hides on /shop/1, /shop/2, etc.
     "/auction", // Hides on /auction/1, /auction/2, etc.
+    "/community-chat",
   ];
 
   // Check if the current pathname starts with any of the paths in the list
@@ -46,7 +42,10 @@ function LayoutWithBottomNav() {
         <Route path="/shop/:shopId" element={<ShopDetailsPage />} />
         <Route path="/auction/:auctionId" element={<AuctionDetailsPage />} />
         <Route path="/all-auctions" element={<AllAuctionsPage />} />
-        <Route path="/community-chat/:communityId" element={<CommunityChatPage />} />
+        <Route
+          path="/community-chat/:communityId"
+          element={<CommunityChatPage />}
+        />
       </Routes>
 
       {/* Conditionally render BottomNav */}
