@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom"; // Added Link
 import {
   ArrowLeft,
   Heart,
@@ -21,7 +21,7 @@ const THEME = {
   primaryBlue: "#195DFF",
 };
 
-// MOCK DATA - In a real app, fetch this using the ID from useParams()
+// MOCK DATA - I added 'sellerId: 1' so it points to WoodNest Furniture
 const AUCTION_DB = {
   1: {
     id: 1,
@@ -36,6 +36,7 @@ const AUCTION_DB = {
     minNextBid: 4500,
     bidIncrement: 300,
     seller: {
+      id: 1, // <--- IMPORTANT: This matches your ShopDetailsPage ID for WoodNest Furniture
       name: "Cycle World Nashik",
       logo: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=100&q=80",
       feedback: "98% Positive Feedback",
@@ -55,7 +56,7 @@ export default function AuctionDetailsPage() {
   const navigate = useNavigate();
   const { auctionId } = useParams();
   
-  // Fetch data based on ID (fallback to ID 1)
+  // Fetch data based on ID
   const auction = AUCTION_DB[auctionId] || AUCTION_DB[1];
   
   const [bidAmount, setBidAmount] = useState(auction.minNextBid);
@@ -73,7 +74,6 @@ export default function AuctionDetailsPage() {
 
   const handlePlaceBid = () => {
     alert(`Bid of ₹${bidAmount.toLocaleString()} placed successfully!`);
-    // In a real app, you'd call an API here
   };
 
   return (
@@ -148,7 +148,7 @@ export default function AuctionDetailsPage() {
             </div>
           </div>
 
-          {/* Seller Card */}
+          {/* Seller Card - NOW CLICKABLE! */}
           <div className="mt-4 bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm shadow-slate-200/70">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-[#0F1638] flex items-center justify-center overflow-hidden">
@@ -162,9 +162,14 @@ export default function AuctionDetailsPage() {
                 <p className="text-[11px] text-slate-500">{auction.seller.feedback}</p>
               </div>
             </div>
-            <button className="px-4 py-1.5 rounded-lg border border-[#195DFF] text-[#195DFF] text-[12px] font-semibold hover:bg-blue-50 transition-colors">
+            
+            {/* CHANGED TO LINK COMPONENT */}
+            <Link 
+              to={`/shop/${auction.seller.id}`}
+              className="px-4 py-1.5 rounded-lg border border-[#195DFF] text-[#195DFF] text-[12px] font-semibold hover:bg-blue-50 transition-colors"
+            >
               View Seller
-            </button>
+            </Link>
           </div>
 
           {/* Bid History */}
