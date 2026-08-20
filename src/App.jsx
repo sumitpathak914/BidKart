@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from "react"; // <--- ADDED THIS IMPORT
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import AllAuctionsPage from "./component/AllAuctionsPage";
 import AuctionDetailsPage from "./component/AuctionDetailsPage";
@@ -18,19 +18,19 @@ import ProfilePage from "./component/ProfilePage";
 import QRScannerPage from "./component/QRScannerPage";
 import SellPage from "./component/SellPage";
 import ShopDetailsPage from "./component/ShopDetailsPage";
-import SplashScreen from "./component/SplashScreen"; // <--- NEW IMPORT
 
 // Helper component to conditionally show the BottomNav
 function LayoutWithBottomNav() {
   const location = useLocation();
 
+  // --- FIX: Automatically Scroll to Top on every page change ---
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
+  // List of paths where you DO NOT want the Bottom Navigation to show
   const hideBottomNavPaths = [
     "/scan-qr",
-    "/",
     "/shop",
     "/auction",
     "/community-chat",
@@ -41,19 +41,17 @@ function LayoutWithBottomNav() {
     "/my-stock",
   ];
 
+  // Check if the current pathname starts with any of the paths in the list
   const shouldShowBottomNav = !hideBottomNavPaths.some((path) =>
     location.pathname.startsWith(path),
   );
 
   return (
     <div className="min-h-screen bg-[#F6F5F1] pb-24">
+      {/* Added pb-24 (padding-bottom) to give space for the nav on main pages */}
+
       <Routes>
-        {/* Splash Screen is now the default route (/) */}
-        <Route path="/" element={<SplashScreen />} />
-
-        {/* Home Page moved to /home */}
-        <Route path="/home" element={<HomePage />} />
-
+        <Route path="/" element={<HomePage />} />
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/sell" element={<SellPage />} />
         <Route path="/community" element={<CommunityPage />} />
@@ -81,6 +79,7 @@ function LayoutWithBottomNav() {
         />
       </Routes>
 
+      {/* Conditionally render BottomNav */}
       {shouldShowBottomNav && <BottomNav />}
     </div>
   );
