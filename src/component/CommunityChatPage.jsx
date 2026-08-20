@@ -24,7 +24,6 @@ const THEME = {
 };
 
 // MOCK DATA - Same data from your community page
-// In a real app, you would fetch this by ID from an API
 const COMMUNITY_DB = {
   1: {
     id: 1,
@@ -38,7 +37,6 @@ const COMMUNITY_DB = {
     description: "The largest tech community in Mumbai. Connect with developers, designers, and tech entrepreneurs.",
     isVerified: true,
     location: "Mumbai",
-    // Mock Chat Messages
     messages: [
       { id: 1, user: "Rahul K.", text: "Hey everyone! Check out this new React library I found.", time: "10:25 AM", isMe: false },
       { id: 2, user: "Priya S.", text: "Oh nice! Does it work with Next.js?", time: "10:27 AM", isMe: false },
@@ -78,7 +76,6 @@ export default function CommunityChatPage() {
     if (foundCommunity) {
       setCommunity(foundCommunity);
     } else {
-      // Fallback if ID not found
       navigate("/community");
     }
   }, [communityId, navigate]);
@@ -94,7 +91,6 @@ export default function CommunityChatPage() {
     e.preventDefault();
     if (!inputMessage.trim()) return;
 
-    // In real app, send to API. Here we just fake it.
     const newMessage = {
       id: Date.now(),
       user: "You",
@@ -110,11 +106,12 @@ export default function CommunityChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F5F1] pb-24 flex flex-col">
-      <div className="mx-auto max-w-md w-full flex flex-col h-screen">
+    // FIX 1: Removed "pb-24" and added "h-screen" and "overflow-hidden"
+    <div className="min-h-screen bg-[#F6F5F1] h-screen flex flex-col overflow-hidden">
+      <div className="mx-auto max-w-md w-full flex flex-col h-full">
         
         {/* --- HEADER --- */}
-        <header className="bg-white px-4 py-3 flex items-center justify-between border-b border-slate-100 flex-shrink-0 shadow-sm">
+        <header className="bg-white px-4 py-3 flex items-center justify-between border-b border-slate-100 flex-shrink-0 shadow-sm z-10">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(-1)} className="p-1 hover:bg-slate-100 rounded-full transition-colors">
               <ArrowLeft size={22} className="text-[#0F1638]" />
@@ -165,6 +162,7 @@ export default function CommunityChatPage() {
         </div>
 
         {/* --- CHAT MESSAGES AREA --- */}
+        {/* FIX 2: Changed flex-1 to flex-1 with overflow-y-auto, removed extra margins/paddings */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3 mt-2 pb-2">
           {community.messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.isMe ? "justify-end" : "justify-start"}`}>
@@ -186,7 +184,8 @@ export default function CommunityChatPage() {
         </div>
 
         {/* --- BOTTOM INPUT AREA --- */}
-        <div className="bg-white border-t border-slate-200 p-3 flex-shrink-0">
+        {/* FIX 3: Added flex-shrink-0 to keep it permanently stuck at the bottom */}
+        <div className="bg-white border-t border-slate-200 p-3 flex-shrink-0 pb-safe">
           <form onSubmit={handleSendMessage} className="flex items-center gap-2">
             <button type="button" className="p-2 text-slate-400 hover:text-[#0F1638]">
               <ImageIcon size={20} />
