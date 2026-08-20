@@ -1,10 +1,25 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import {
-  MapPin, ChevronDown, Bell, Search, SlidersHorizontal, QrCode,
-  ChevronRight, Heart, Clock, LayoutGrid, Radio, Store, Users,
-  ShoppingBag, Star as StarIcon, TrendingUp, ShieldCheck, Zap, Loader2
+    Bell,
+    ChevronDown,
+    ChevronRight,
+    Clock,
+    Heart,
+    LayoutGrid,
+    Loader2,
+    MapPin,
+    QrCode,
+    Radio,
+    Search,
+    ShieldCheck,
+    ShoppingBag,
+    Star as StarIcon,
+    Store,
+    TrendingUp,
+    Users,
+    Zap,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const THEME = {
   ink: "#0F1638",
@@ -23,18 +38,105 @@ const CATEGORIES = [
 ];
 
 const AUCTIONS = [
-  { id: 1, title: "Hero Sprint 27.5T Cycle", location: "Nashik", distance: "4.8 km", image: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&q=80", bid: "3,200", bids: 47, watching: 152, timeLeft: "18m" },
-  { id: 2, title: "Nike Air Max Premium", location: "Nashik", distance: "5.2 km", image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=400&q=80", bid: "1,450", bids: 31, watching: 98, timeLeft: "32m" },
-  { id: 3, title: "Canon EOS 200D DSLR", location: "Nashik", distance: "6.1 km", image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80", bid: "8,500", bids: 22, watching: 64, timeLeft: "1h 12m" },
-  { id: 4, title: "iPhone 13 Pro Max", location: "Nashik", distance: "7.3 km", image: "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=400&q=80", bid: "32,000", bids: 18, watching: 52, timeLeft: "45m" },
-  { id: 5, title: "Wooden Center Table", location: "Nashik", distance: "2.1 km", image: "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=400&q=80", bid: "1,200", bids: 12, watching: 35, timeLeft: "2h 10m" },
+  {
+    id: 1,
+    title: "Hero Sprint 27.5T Cycle",
+    location: "Nashik",
+    distance: "4.8 km",
+    image:
+      "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&q=80",
+    bid: "3,200",
+    bids: 47,
+    watching: 152,
+    timeLeft: "18m",
+  },
+  {
+    id: 2,
+    title: "Nike Air Max Premium",
+    location: "Nashik",
+    distance: "5.2 km",
+    image:
+      "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=400&q=80",
+    bid: "1,450",
+    bids: 31,
+    watching: 98,
+    timeLeft: "32m",
+  },
+  {
+    id: 3,
+    title: "Canon EOS 200D DSLR",
+    location: "Nashik",
+    distance: "6.1 km",
+    image:
+      "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80",
+    bid: "8,500",
+    bids: 22,
+    watching: 64,
+    timeLeft: "1h 12m",
+  },
+  {
+    id: 4,
+    title: "iPhone 13 Pro Max",
+    location: "Nashik",
+    distance: "7.3 km",
+    image:
+      "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=400&q=80",
+    bid: "32,000",
+    bids: 18,
+    watching: 52,
+    timeLeft: "45m",
+  },
+  {
+    id: 5,
+    title: "Wooden Center Table",
+    location: "Nashik",
+    distance: "2.1 km",
+    image:
+      "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=400&q=80",
+    bid: "1,200",
+    bids: 12,
+    watching: 35,
+    timeLeft: "2h 10m",
+  },
 ];
 
 const SHOPS = [
-  { id: 1, name: "Fashion Hub", type: "Clothing Store", distance: "2.3 km", rating: 4.8, image: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80" },
-  { id: 2, name: "Electro World", type: "Electronics", distance: "3.1 km", rating: 4.6, image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80" },
-  { id: 3, name: "Home Style", type: "Furniture", distance: "4.0 km", rating: 4.7, image: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=400&q=80" },
-  { id: 4, name: "Cycle Point", type: "Bicycle Store", distance: "4.8 km", rating: 4.5, image: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&q=80" },
+  {
+    id: 1,
+    name: "Fashion Hub",
+    type: "Clothing Store",
+    distance: "2.3 km",
+    rating: 4.8,
+    image:
+      "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80",
+  },
+  {
+    id: 2,
+    name: "Electro World",
+    type: "Electronics",
+    distance: "3.1 km",
+    rating: 4.6,
+    image:
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80",
+  },
+  {
+    id: 3,
+    name: "Home Style",
+    type: "Furniture",
+    distance: "4.0 km",
+    rating: 4.7,
+    image:
+      "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=400&q=80",
+  },
+  {
+    id: 4,
+    name: "Cycle Point",
+    type: "Bicycle Store",
+    distance: "4.8 km",
+    rating: 4.5,
+    image:
+      "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&q=80",
+  },
 ];
 
 export default function HomePage() {
@@ -59,20 +161,21 @@ export default function HomePage() {
       async (position) => {
         const { latitude, longitude } = position.coords;
         setUserCoords({ latitude, longitude });
-        
+
         try {
           // Using free OpenStreetMap API (Nominatim) to convert coords to address
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&accept-language=en`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&accept-language=en`,
           );
           const data = await response.json();
-          
+
           if (data && data.display_name) {
             // Extract City/State from the full address
-            const addressParts = data.display_name.split(',');
-            // Usually the city/state is in the last few parts. 
+            const addressParts = data.display_name.split(",");
+            // Usually the city/state is in the last few parts.
             // We take the last 2-3 parts to make it look clean
-            const shortAddress = addressParts.slice(-3, -1).join(', ').trim() || "Nashik, India";
+            const shortAddress =
+              addressParts.slice(-3, -1).join(", ").trim() || "Nashik, India";
             setLocationText(shortAddress);
           } else {
             setLocationText("Nashik, India"); // Fallback
@@ -89,34 +192,43 @@ export default function HomePage() {
         setLocationText("Nashik, India"); // Fallback if user denies permission
         setIsLocationLoading(false);
       },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true },
     );
   }, []);
 
   return (
     <div className="min-h-screen bg-[#F8F7F4] pb-24">
       <div className="mx-auto max-w-md">
-        
         {/* --- PREMIUM HEADER --- */}
         <header className="px-5 pt-6 pb-2 bg-[#F8F7F4]">
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full" style={{ backgroundColor: THEME.gold }}>
+                <span
+                  className="flex h-6 w-6 items-center justify-center rounded-full"
+                  style={{ backgroundColor: THEME.gold }}
+                >
                   <MapPin size={12} className="text-white" />
                 </span>
-                <span className="text-xs font-semibold text-slate-500">Current Location</span>
+                <span className="text-xs font-semibold text-slate-500">
+                  Current Location
+                </span>
               </div>
-              
+
               {/* --- UPDATED: Dynamic Location Display --- */}
-              <button className="mt-0.5 flex items-center gap-1" style={{ color: THEME.ink }}>
+              <button
+                className="mt-0.5 flex items-center gap-1"
+                style={{ color: THEME.ink }}
+              >
                 {isLocationLoading ? (
                   <span className="flex items-center gap-2 text-sm font-semibold">
                     <Loader2 size={14} className="animate-spin" /> Loading...
                   </span>
                 ) : (
                   <>
-                    <span className="text-base font-bold truncate max-w-[160px]">{locationText}</span>
+                    <span className="text-base font-bold truncate max-w-[160px]">
+                      {locationText}
+                    </span>
                     <ChevronDown size={16} className="text-slate-400" />
                   </>
                 )}
@@ -143,7 +255,10 @@ export default function HomePage() {
             </div>
           </div>
 
-          <h1 className="mt-5 text-2xl font-extrabold" style={{ color: THEME.ink }}>
+          <h1
+            className="mt-5 text-2xl font-extrabold"
+            style={{ color: THEME.ink }}
+          >
             Hi, Sumit <span className="inline-block animate-bounce">👋</span>
           </h1>
           <p className="mt-0.5 text-sm text-slate-500 font-medium">
@@ -180,7 +295,9 @@ export default function HomePage() {
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
                 className={`flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-bold transition-all ${
-                  isActive ? "text-white shadow-md" : "bg-white text-slate-600 shadow-sm ring-1 ring-slate-100"
+                  isActive
+                    ? "text-white shadow-md"
+                    : "bg-white text-slate-600 shadow-sm ring-1 ring-slate-100"
                 }`}
                 style={{ backgroundColor: isActive ? THEME.ink : "white" }}
               >
@@ -192,15 +309,18 @@ export default function HomePage() {
         </div>
 
         {/* --- HERO BANNER (Premium Glass look) --- */}
-        <div className="mx-5 mt-5 overflow-hidden rounded-3xl p-6 text-white shadow-2xl relative"
-          style={{ background: `linear-gradient(145deg, ${THEME.ink} 0%, #243b75 100%)` }}
+        <div
+          className="mx-5 mt-5 overflow-hidden rounded-3xl p-6 text-white shadow-2xl relative"
+          style={{
+            background: `linear-gradient(145deg, ${THEME.ink} 0%, #243b75 100%)`,
+          }}
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
           <div className="absolute bottom-0 right-0 w-24 h-24 bg-[#D9A441]/20 rounded-full -mr-12 -mb-12 blur-xl"></div>
 
           <div className="relative z-10 flex justify-between items-start">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-md px-3 py-1 text-[11px] font-semibold border border-white/10">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> 
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               LIVE NOW
             </span>
             <TrendingUp size={20} className="text-white/30" />
@@ -212,7 +332,7 @@ export default function HomePage() {
           <p className="relative z-10 mt-1 text-sm text-blue-100/80 font-medium">
             Exclusive auctions from verified local sellers.
           </p>
-          
+
           <div className="relative z-10 mt-5 flex items-center gap-3">
             <Link
               to="/explore"
@@ -222,7 +342,8 @@ export default function HomePage() {
               Explore Now <ChevronRight size={18} />
             </Link>
             <div className="flex items-center gap-1 text-[11px] text-white/60 font-medium">
-              <ShieldCheck size={14} className="text-emerald-400" /> Safe Bidding
+              <ShieldCheck size={14} className="text-emerald-400" /> Safe
+              Bidding
             </div>
           </div>
         </div>
@@ -230,11 +351,14 @@ export default function HomePage() {
         {/* --- FOCUS SCROLL: LIVE AUCTIONS --- */}
         <section className="mt-7">
           <div className="flex items-center justify-between px-5 mb-2">
-            <h3 className="flex items-center gap-2 text-[17px] font-extrabold" style={{ color: THEME.ink }}>
+            <h3
+              className="flex items-center gap-2 text-[17px] font-extrabold"
+              style={{ color: THEME.ink }}
+            >
               <Zap size={18} style={{ color: THEME.gold }} /> Live Auctions
             </h3>
             <Link
-              to="/explore"
+              to="/all-auctions"
               className="flex items-center gap-0.5 text-[13px] font-bold"
               style={{ color: THEME.gold }}
             >
@@ -242,7 +366,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div 
+          <div
             ref={scrollRef}
             className="flex gap-4 overflow-x-auto px-5 pb-6 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
@@ -253,11 +377,14 @@ export default function HomePage() {
                 className="w-[80%] flex-shrink-0 snap-center"
               >
                 <div className="relative h-72 w-full overflow-hidden rounded-3xl bg-white shadow-xl shadow-slate-200/70 ring-1 ring-slate-100/50 transition-transform hover:scale-[1.01]">
-                  
                   <div className="relative h-44 w-full overflow-hidden bg-slate-100">
-                    <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="h-full w-full object-cover"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-                    
+
                     <div className="absolute top-3 left-3 flex items-center gap-2">
                       <span className="rounded-lg bg-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-lg shadow-red-500/30">
                         LIVE
@@ -277,7 +404,10 @@ export default function HomePage() {
                   <div className="p-4 flex flex-col h-[112px] justify-between">
                     <div>
                       <div className="flex items-center justify-between">
-                        <p className="text-[15px] font-bold truncate" style={{ color: THEME.ink }}>
+                        <p
+                          className="text-[15px] font-bold truncate"
+                          style={{ color: THEME.ink }}
+                        >
                           {item.title}
                         </p>
                       </div>
@@ -288,12 +418,17 @@ export default function HomePage() {
 
                     <div className="flex items-end justify-between border-t border-slate-100 pt-3">
                       <div>
-                        <p className="text-[10px] text-slate-400 font-medium">Current Bid</p>
-                        <p className="text-[17px] font-extrabold" style={{ color: THEME.ink }}>
+                        <p className="text-[10px] text-slate-400 font-medium">
+                          Current Bid
+                        </p>
+                        <p
+                          className="text-[17px] font-extrabold"
+                          style={{ color: THEME.ink }}
+                        >
                           ₹{item.bid}
                         </p>
                       </div>
-                      <button 
+                      <button
                         className="rounded-xl px-4 py-1.5 text-[12px] font-bold text-white shadow-md transition-transform hover:scale-105 active:scale-95"
                         style={{ backgroundColor: THEME.ink }}
                       >
@@ -310,7 +445,10 @@ export default function HomePage() {
         {/* --- FOCUS SCROLL: SHOPS NEAR YOU --- */}
         <section className="mt-2">
           <div className="flex items-center justify-between px-5 mb-2">
-            <h3 className="flex items-center gap-2 text-[17px] font-extrabold" style={{ color: THEME.ink }}>
+            <h3
+              className="flex items-center gap-2 text-[17px] font-extrabold"
+              style={{ color: THEME.ink }}
+            >
               <Store size={18} style={{ color: THEME.gold }} /> Top Shops
             </h3>
             <Link
@@ -324,24 +462,37 @@ export default function HomePage() {
 
           <div className="flex gap-4 overflow-x-auto px-5 pb-6 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {SHOPS.map((shop) => (
-              <div 
-                key={shop.id} 
+              <div
+                key={shop.id}
                 className="w-[65%] flex-shrink-0 snap-center cursor-pointer"
                 onClick={() => navigate(`/shop/${shop.id}`)}
               >
                 <div className="relative h-48 w-full overflow-hidden rounded-2xl bg-white shadow-lg shadow-slate-200/70 ring-1 ring-slate-100/50">
-                  <img src={shop.image} alt={shop.name} className="h-full w-full object-cover" />
+                  <img
+                    src={shop.image}
+                    alt={shop.name}
+                    className="h-full w-full object-cover"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                  
+
                   <div className="absolute bottom-3 left-3 right-3">
                     <div className="flex items-center gap-1.5">
-                      <h4 className="text-[15px] font-bold text-white truncate flex-1">{shop.name}</h4>
+                      <h4 className="text-[15px] font-bold text-white truncate flex-1">
+                        {shop.name}
+                      </h4>
                       <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                        <StarIcon size={10} className="fill-amber-400 text-amber-400" />
-                        <span className="text-[10px] font-bold text-white">{shop.rating}</span>
+                        <StarIcon
+                          size={10}
+                          className="fill-amber-400 text-amber-400"
+                        />
+                        <span className="text-[10px] font-bold text-white">
+                          {shop.rating}
+                        </span>
                       </div>
                     </div>
-                    <p className="text-[11px] text-white/80 mt-0.5">{shop.type} • {shop.distance} away</p>
+                    <p className="text-[11px] text-white/80 mt-0.5">
+                      {shop.type} • {shop.distance} away
+                    </p>
                   </div>
                 </div>
               </div>
@@ -367,7 +518,7 @@ export default function HomePage() {
               className="absolute left-12 h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-md"
               alt=""
             />
-            <span 
+            <span
               className="absolute -bottom-1 left-6 rounded-full border-2 border-white px-2 py-0.5 text-[9px] font-bold text-white shadow-md"
               style={{ backgroundColor: THEME.gold }}
             >
@@ -375,7 +526,10 @@ export default function HomePage() {
             </span>
           </div>
           <div className="flex-1">
-            <p className="text-[15px] font-extrabold" style={{ color: THEME.ink }}>
+            <p
+              className="text-[15px] font-extrabold"
+              style={{ color: THEME.ink }}
+            >
               Join Local Communities
             </p>
             <p className="mt-0.5 text-[11px] text-slate-500 font-medium">
@@ -390,7 +544,6 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-
       </div>
     </div>
   );

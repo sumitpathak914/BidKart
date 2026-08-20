@@ -13,6 +13,7 @@ import ProfilePage from "./component/ProfilePage";
 import QRScannerPage from "./component/QRScannerPage";
 import SellPage from "./component/SellPage";
 import ShopDetailsPage from "./component/ShopDetailsPage";
+import AllAuctionsPage from "./component/AllAuctionsPage";
 
 // Helper component to conditionally show the BottomNav
 function LayoutWithBottomNav() {
@@ -43,6 +44,7 @@ function LayoutWithBottomNav() {
         <Route path="/scan-qr" element={<QRScannerPage />} />
         <Route path="/shop/:shopId" element={<ShopDetailsPage />} />
         <Route path="/auction/:auctionId" element={<AuctionDetailsPage />} />
+         <Route path="/all-auctions" element={<AllAuctionsPage />} />
       </Routes>
 
       {/* Conditionally render BottomNav */}
