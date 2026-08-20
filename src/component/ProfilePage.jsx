@@ -632,7 +632,7 @@ export default function ProfilePage() {
               <p className="text-xs text-slate-500">Manage your account</p>
             </div>
             <div className="flex items-center gap-3">
-              <button
+              {/* <button
                 aria-label="Notifications"
                 className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm"
               >
@@ -643,7 +643,7 @@ export default function ProfilePage() {
                 >
                   3
                 </span>
-              </button>
+              </button> */}
               <button className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                 <LogOut size={20} className="text-slate-500" />
               </button>
