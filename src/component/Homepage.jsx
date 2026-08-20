@@ -26,6 +26,9 @@ import {
   Rocket,
   ArrowRight,
   X,
+  CheckCircle,
+  Crown,
+  Store as StoreIcon
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -175,8 +178,8 @@ export default function HomePage() {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
-  // --- NEW: State for Brand Promotion Banner ---
-  const [showPromoBanner, setShowPromoBanner] = useState(true);
+  // --- STATE FOR THE MODAL ---
+  const [showPromoModal, setShowPromoModal] = useState(true);
 
   const [locationText, setLocationText] = useState("Getting location...");
   const [isLocationLoading, setIsLocationLoading] = useState(true);
@@ -235,7 +238,100 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F8F7F4] pb-24">
+    <div className="min-h-screen bg-[#F8F7F4] pb-24 relative">
+      
+      {/* ============================================ */}
+      {/* --- DIRECT SCREEN MODAL FOR BRAND PROMOTION --- */}
+      {/* ============================================ */}
+      {showPromoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up relative">
+            
+            {/* Close 'X' Button */}
+            <button 
+              onClick={() => setShowPromoModal(false)}
+              className="absolute top-4 right-4 z-10 p-1 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
+            >
+              <X size={20} className="text-slate-500" />
+            </button>
+
+            {/* Modal Banner / Header */}
+            <div className="relative p-6 text-white text-center"
+              style={{
+                background: `linear-gradient(135deg, ${THEME.ink} 0%, #1a2a5c 100%)`
+              }}
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
+              <div className="absolute bottom-0 left-0 w-20 h-20 bg-[#D9A441]/10 rounded-full -ml-10 -mb-10"></div>
+              
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="w-16 h-16 bg-[#D9A441] rounded-full flex items-center justify-center mb-3 shadow-lg shadow-[#D9A441]/30">
+                  <Rocket size={32} className="text-white" />
+                </div>
+                <h2 className="text-2xl font-extrabold">Promote Your Brand!</h2>
+                <p className="text-sm text-white/80 mt-1 max-w-[250px]">
+                  Reach thousands of customers instantly
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Body (Benefits) */}
+            <div className="p-6 space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 bg-blue-50 rounded-lg">
+                    <StoreIcon size={18} className="text-blue-600" />
+                  </div>
+                  <p className="text-[13px] font-medium text-slate-700">Showcase your products to local buyers</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 bg-green-50 rounded-lg">
+                    <Crown size={18} className="text-green-600" />
+                  </div>
+                  <p className="text-[13px] font-medium text-slate-700">Get verified and build trust</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 bg-amber-50 rounded-lg">
+                    <TrendingUp size={18} className="text-amber-600" />
+                  </div>
+                  <p className="text-[13px] font-medium text-slate-700">Exclusive analytics & growth tools</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 bg-purple-50 rounded-lg">
+                    <Users size={18} className="text-purple-600" />
+                  </div>
+                  <p className="text-[13px] font-medium text-slate-700">Connect with communities effortlessly</p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex gap-3">
+                {/* Close Button */}
+                <button 
+                  onClick={() => setShowPromoModal(false)}
+                  className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors"
+                >
+                  Maybe Later
+                </button>
+                {/* Promote Now Button */}
+                <button 
+                  onClick={() => {
+                    setShowPromoModal(false);
+                    navigate("/profile"); // Navigates to profile to switch to business
+                  }}
+                  className="flex-[1.5] py-3 rounded-xl text-white font-bold shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-105 active:scale-95"
+                  style={{ backgroundColor: THEME.ink }}
+                >
+                  Promote Now <ArrowRight size={18} />
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+      {/* ============================================ */}
+
+
       <div className="mx-auto max-w-md">
         {/* --- PREMIUM HEADER --- */}
         <header className="px-5 pt-6 pb-2 bg-[#F8F7F4]">
@@ -536,63 +632,6 @@ export default function HomePage() {
             ))}
           </div>
         </section>
-
-        {/* ============================================ */}
-        {/* --- NEW PROMOTION BANNER (Instead of Modal) --- */}
-        {/* ============================================ */}
-        {showPromoBanner && (
-          <div className="mx-5 mt-6 relative rounded-3xl p-5 text-white shadow-2xl overflow-hidden"
-            style={{
-              background: `linear-gradient(135deg, #4B0082 0%, #1E3A8A 50%, #0F1638 100%)`,
-            }}
-          >
-            {/* Decorative Background Blobs */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#D9A441]/20 rounded-full -ml-12 -mb-12 blur-xl"></div>
-
-            <div className="relative z-10 flex flex-col gap-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-white/10 backdrop-blur-sm rounded-xl">
-                    <Rocket size={20} className="text-[#D9A441]" />
-                  </div>
-                  <h3 className="text-[18px] font-extrabold">Promote Your Brand!</h3>
-                </div>
-                <button 
-                  onClick={() => setShowPromoBanner(false)}
-                  className="p-1 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-                >
-                  <X size={20} className="text-white" />
-                </button>
-              </div>
-
-              <p className="text-[13px] text-white/80 leading-relaxed">
-                Reach thousands of local customers instantly. Showcase your products & grow your business today!
-              </p>
-
-              <div className="flex items-center gap-3 mt-1">
-                <button
-                  onClick={() => {
-                    // Close banner and navigate to Explore or Profile
-                    setShowPromoBanner(false);
-                    navigate("/explore"); // Can be changed to your brand promotion page later
-                  }}
-                  className="flex-1 py-2.5 rounded-xl bg-white font-extrabold flex items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105 active:scale-95"
-                  style={{ color: THEME.ink }}
-                >
-                  Promote Now <ArrowRight size={16} />
-                </button>
-                <button
-                  onClick={() => setShowPromoBanner(false)}
-                  className="px-4 py-2.5 rounded-xl border border-white/20 text-white text-xs font-medium hover:bg-white/10 transition-colors"
-                >
-                  Maybe Later
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {/* ============================================ */}
 
         {/* --- NEW SECTION 1: BEST DEALS IN YOUR AREA --- */}
         <section className="mt-6">
