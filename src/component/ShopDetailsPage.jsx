@@ -17,9 +17,9 @@ import {
   Store,
   Tag,
   Truck,
-  Users,       // Added
-  UserPlus,    // Added
-  Check        // Added
+  Users,
+  UserPlus,
+  Check
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -31,6 +31,23 @@ const THEME = {
   mapBg: "#E7ECFA",
   primary: "#5B4DFF",
 };
+
+// --- SKELETON LOADER COMPONENTS ---
+const Shimmer = () => (
+  <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+);
+
+const SkeletonBox = ({ className }) => (
+  <div className={`relative overflow-hidden bg-slate-200 rounded-xl ${className}`}>
+    <Shimmer />
+  </div>
+);
+
+const SkeletonText = ({ className }) => (
+  <div className={`relative overflow-hidden bg-slate-200 rounded-full ${className}`}>
+    <Shimmer />
+  </div>
+);
 
 // Mock database - Use this to fetch by ID
 const SHOPS_DB = {
@@ -172,21 +189,108 @@ export default function ShopDetailsPage() {
   const [activeTab, setActiveTab] = useState("portfolio");
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [isCommunityJoined, setIsCommunityJoined] = useState(false); // New State
+  const [isCommunityJoined, setIsCommunityJoined] = useState(false);
   const [shop, setShop] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load data based on URL ID
+  // Load data based on URL ID with loading simulation
   useEffect(() => {
-    const foundShop = SHOPS_DB[shopId] || SHOPS_DB[1]; // Fallback to ID 1
-    setShop(foundShop);
+    setIsLoading(true);
+    // Simulate API delay
+    const timer = setTimeout(() => {
+      const foundShop = SHOPS_DB[shopId] || SHOPS_DB[1];
+      setShop(foundShop);
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
   }, [shopId]);
 
-  if (!shop)
+  if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        Loading...
+      <div className="min-h-screen bg-[#F6F5F1] pb-24">
+        <div className="mx-auto max-w-md">
+          {/* Skeleton Cover Image */}
+          <SkeletonBox className="relative h-48 w-full bg-slate-300 rounded-none" />
+
+          {/* Skeleton Shop Info Section */}
+          <div className="px-5 pt-12 pb-2">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mt-2">
+                  <SkeletonBox className="w-20 h-20 rounded-full border-4 border-white" />
+                  <div className="flex-1">
+                    <SkeletonText className="w-40 h-6" />
+                    <SkeletonText className="w-24 h-4 mt-2" />
+                    <div className="flex items-center gap-3 mt-2">
+                      <SkeletonText className="w-16 h-4" />
+                      <SkeletonText className="w-16 h-4" />
+                      <SkeletonText className="w-16 h-4" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <SkeletonBox className="w-20 h-8 rounded-lg" />
+            </div>
+
+            {/* Skeleton Stats Row */}
+            <div className="grid grid-cols-4 gap-2 mt-4 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+              <div className="text-center"><SkeletonText className="w-10 h-5 mx-auto" /><SkeletonText className="w-12 h-3 mt-1 mx-auto" /></div>
+              <div className="text-center"><SkeletonText className="w-10 h-5 mx-auto" /><SkeletonText className="w-12 h-3 mt-1 mx-auto" /></div>
+              <div className="text-center"><SkeletonText className="w-10 h-5 mx-auto" /><SkeletonText className="w-12 h-3 mt-1 mx-auto" /></div>
+              <div className="text-center"><SkeletonText className="w-10 h-5 mx-auto" /><SkeletonText className="w-12 h-3 mt-1 mx-auto" /></div>
+            </div>
+
+            {/* Skeleton Community Card */}
+            <div className="mt-3 bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <SkeletonBox className="w-12 h-12 rounded-full" />
+                <div>
+                  <SkeletonText className="w-32 h-4" />
+                  <SkeletonText className="w-40 h-3 mt-1" />
+                </div>
+              </div>
+              <SkeletonBox className="w-16 h-8 rounded-lg" />
+            </div>
+          </div>
+
+          {/* Skeleton Tabs */}
+          <div className="px-5 mt-4 border-b border-slate-200 bg-white shadow-sm">
+            <div className="flex gap-6 overflow-x-auto py-3">
+              <SkeletonText className="w-16 h-4" />
+              <SkeletonText className="w-20 h-4" />
+              <SkeletonText className="w-16 h-4" />
+              <SkeletonText className="w-20 h-4" />
+            </div>
+          </div>
+
+          {/* Skeleton Content Area */}
+          <div className="px-5 pt-4 pb-6 space-y-4">
+            <SkeletonBox className="w-full h-32 rounded-2xl" />
+            <div className="flex items-center justify-between"><SkeletonText className="w-32 h-5" /><SkeletonText className="w-16 h-5" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <SkeletonBox className="w-full h-48 rounded-2xl" />
+              <SkeletonBox className="w-full h-48 rounded-2xl" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <SkeletonBox className="w-full h-28 rounded-xl" />
+              <SkeletonBox className="w-full h-28 rounded-xl" />
+            </div>
+            <SkeletonBox className="w-full h-24 rounded-xl" />
+          </div>
+
+          {/* Skeleton Bottom Buttons */}
+          <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t border-slate-200 shadow-lg">
+            <div className="flex gap-2">
+              <SkeletonBox className="flex-1 h-12 rounded-xl" />
+              <SkeletonBox className="flex-[1.5] h-12 rounded-xl" />
+            </div>
+          </div>
+        </div>
       </div>
     );
+  }
+
+  if (!shop) return <div className="h-screen flex items-center justify-center">Loading...</div>;
 
   const renderPortfolio = () => (
     <div className="space-y-6">
@@ -311,7 +415,7 @@ export default function ShopDetailsPage() {
         </div>
       </div>
 
-      {/* About the Shop (Stats Section + NEW Join Community) */}
+      {/* About the Shop (Stats Section) */}
       <div>
         <h4 className="font-bold text-[#0F1638] mb-3">About the Shop</h4>
         <div className="grid grid-cols-2 gap-2">
@@ -335,11 +439,6 @@ export default function ShopDetailsPage() {
             );
           })}
         </div>
-
-        {/* --- NEW: Join Community Card --- */}
-       
-        {/* --- End Join Community Card --- */}
-
       </div>
     </div>
   );
@@ -525,40 +624,42 @@ export default function ShopDetailsPage() {
             </button>
           </div>
 
-                  {/* Stats Row */}
-                   <div className="mt-3 bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#FDF3E1] rounded-full">
-              <Users size={20} className="text-[#D9A441]" />
+          {/* Community Card */}
+          <div className="mt-3 bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-[#FDF3E1] rounded-full">
+                <Users size={20} className="text-[#D9A441]" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-[#0F1638]">WoodNest Furniture Community</p>
+                <p className="text-[11px] text-slate-500">
+                  {isCommunityJoined 
+                    ? "You are a member of WoodNest Furniture" 
+                    : "Connect with other customers"}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-bold text-[#0F1638]">WoodNest Furniture Community</p>
-              <p className="text-[11px] text-slate-500">
-                {isCommunityJoined 
-                  ? "You are a member of WoodNest Furniture" 
-                  : "Connect with other customers"}
-              </p>
-            </div>
+            <button
+              onClick={() => setIsCommunityJoined(!isCommunityJoined)}
+              className={`px-5 py-2 rounded-lg border text-xs font-semibold transition-all ${
+                isCommunityJoined
+                  ? "border-green-500 text-green-600 bg-green-50"
+                  : "border-[#5B4DFF] text-[#5B4DFF] bg-white"
+              }`}
+            >
+              {isCommunityJoined ? (
+                <span className="flex items-center gap-1">
+                  <Check size={14} /> Joined
+                </span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  <UserPlus size={14} /> Join
+                </span>
+              )}
+            </button>
           </div>
-          <button
-            onClick={() => setIsCommunityJoined(!isCommunityJoined)}
-            className={`px-5 py-2 rounded-lg border text-xs font-semibold transition-all ${
-              isCommunityJoined
-                ? "border-green-500 text-green-600 bg-green-50"
-                : "border-[#5B4DFF] text-[#5B4DFF] bg-white"
-            }`}
-          >
-            {isCommunityJoined ? (
-              <span className="flex items-center gap-1">
-                <Check size={14} /> Joined
-              </span>
-            ) : (
-              <span className="flex items-center gap-1">
-                <UserPlus size={14} /> Join
-              </span>
-            )}
-          </button>
-        </div>
+
+          {/* Stats Row */}
           <div className="grid grid-cols-4 gap-2 mt-4 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
             <div className="text-center border-r border-slate-100 last:border-r-0">
               <div className="flex items-center justify-center gap-1 text-[#0F1638] mb-0.5">
@@ -625,9 +726,6 @@ export default function ShopDetailsPage() {
         {/* Bottom Fixed Buttons */}
         <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t border-slate-200 shadow-lg">
           <div className="flex gap-2">
-            {/* <button className="flex-1 p-2 rounded-xl border-2 border-[#5B4DFF] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
-              <MessageCircle size={18} /> Message
-            </button> */}
             <button className="flex-1 p-2 rounded-xl border-2 border-[rgb(91,77,255)] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
               <Phone size={18} /> Call Shop
             </button>

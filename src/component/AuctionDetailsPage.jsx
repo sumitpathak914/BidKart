@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom"; // Added Link
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Heart,
@@ -20,6 +20,23 @@ const THEME = {
   goldSoft: "#FDF3E1",
   primaryBlue: "#195DFF",
 };
+
+// --- SKELETON LOADER COMPONENTS ---
+const Shimmer = () => (
+  <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+);
+
+const SkeletonBox = ({ className }) => (
+  <div className={`relative overflow-hidden bg-slate-200 rounded-xl ${className}`}>
+    <Shimmer />
+  </div>
+);
+
+const SkeletonText = ({ className }) => (
+  <div className={`relative overflow-hidden bg-slate-200 rounded-full ${className}`}>
+    <Shimmer />
+  </div>
+);
 
 // MOCK DATA - I added 'sellerId: 1' so it points to WoodNest Furniture
 const AUCTION_DB = {
@@ -55,12 +72,19 @@ const AUCTION_DB = {
 export default function AuctionDetailsPage() {
   const navigate = useNavigate();
   const { auctionId } = useParams();
+  const [isLoading, setIsLoading] = useState(true);
   
   // Fetch data based on ID
   const auction = AUCTION_DB[auctionId] || AUCTION_DB[1];
   
   const [bidAmount, setBidAmount] = useState(auction.minNextBid);
   const [isLiked, setIsLiked] = useState(false);
+
+  // Loading Simulation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleIncrement = () => {
     setBidAmount(prev => prev + auction.bidIncrement);
@@ -75,6 +99,82 @@ export default function AuctionDetailsPage() {
   const handlePlaceBid = () => {
     alert(`Bid of ₹${bidAmount.toLocaleString()} placed successfully!`);
   };
+
+  // --- Skeleton Render ---
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F6F5F1] pb-32">
+        <div className="mx-auto max-w-md relative">
+          {/* Header Skeleton */}
+          <header className="sticky top-0 z-10 bg-white px-4 py-3 flex items-center justify-between border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <SkeletonBox className="w-8 h-8 rounded-full" />
+              <SkeletonText className="w-32 h-5" />
+            </div>
+            <div className="flex items-center gap-3">
+              <SkeletonBox className="w-8 h-8 rounded-full" />
+              <SkeletonBox className="w-8 h-8 rounded-full" />
+            </div>
+          </header>
+
+          <div className="px-4 pt-4 pb-6 space-y-4">
+            {/* Status & Title Skeleton */}
+            <div className="flex items-center gap-2 mb-1">
+              <SkeletonBox className="w-12 h-5 rounded" />
+              <SkeletonText className="w-24 h-4" />
+            </div>
+            <SkeletonText className="w-3/4 h-7" />
+            <SkeletonText className="w-1/3 h-4 mt-2" />
+
+            {/* Product Image Skeleton */}
+            <SkeletonBox className="w-full h-48 rounded-2xl" />
+
+            {/* Stats Grid Skeleton */}
+            <div className="grid grid-cols-4 gap-2 bg-white p-3 rounded-2xl shadow-sm shadow-slate-200/70">
+              <div className="text-center"><SkeletonText className="w-12 h-3 mx-auto" /><SkeletonText className="w-12 h-5 mx-auto mt-1" /></div>
+              <div className="text-center"><SkeletonText className="w-12 h-3 mx-auto" /><SkeletonText className="w-12 h-5 mx-auto mt-1" /></div>
+              <div className="text-center"><SkeletonText className="w-12 h-3 mx-auto" /><SkeletonText className="w-12 h-5 mx-auto mt-1" /></div>
+              <div className="text-center"><SkeletonText className="w-12 h-3 mx-auto" /><SkeletonText className="w-12 h-5 mx-auto mt-1" /></div>
+            </div>
+
+            {/* Seller Card Skeleton */}
+            <div className="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm shadow-slate-200/70">
+              <div className="flex items-center gap-3">
+                <SkeletonBox className="w-12 h-12 rounded-full" />
+                <div>
+                  <SkeletonText className="w-28 h-4" />
+                  <SkeletonText className="w-20 h-3 mt-1" />
+                </div>
+              </div>
+              <SkeletonBox className="w-20 h-8 rounded-lg" />
+            </div>
+
+            {/* Bid History Skeleton */}
+            <SkeletonBox className="w-full h-40 rounded-2xl" />
+          </div>
+
+          {/* Bottom Bid Section Skeleton */}
+          <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-3xl border-t border-slate-100 z-20">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <SkeletonText className="w-24 h-3" />
+                  <SkeletonText className="w-24 h-7 mt-1" />
+                </div>
+                <div className="flex items-center bg-slate-50 rounded-xl border border-slate-200">
+                  <SkeletonBox className="w-10 h-10 rounded-l-xl" />
+                  <SkeletonText className="w-16 h-5" />
+                  <SkeletonBox className="w-10 h-10 rounded-r-xl" />
+                </div>
+              </div>
+              <SkeletonBox className="w-full h-12 rounded-xl" />
+              <SkeletonText className="w-48 h-3 mx-auto" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F6F5F1] pb-32">
@@ -163,7 +263,6 @@ export default function AuctionDetailsPage() {
               </div>
             </div>
             
-            {/* CHANGED TO LINK COMPONENT */}
             <Link 
               to={`/shop/${auction.seller.id}`}
               className="px-4 py-1.5 rounded-lg border border-[#195DFF] text-[#195DFF] text-[12px] font-semibold hover:bg-blue-50 transition-colors"

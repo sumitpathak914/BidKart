@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MapPin,
   ChevronDown,
@@ -28,11 +28,35 @@ const THEME = {
   mapBg: "#E7ECFA",
 };
 
+// --- SKELETON LOADER COMPONENTS ---
+const Shimmer = () => (
+  <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+);
+
+const SkeletonBox = ({ className }) => (
+  <div className={`relative overflow-hidden bg-slate-200 rounded-xl ${className}`}>
+    <Shimmer />
+  </div>
+);
+
+const SkeletonText = ({ className }) => (
+  <div className={`relative overflow-hidden bg-slate-200 rounded-full ${className}`}>
+    <Shimmer />
+  </div>
+);
+
 export default function CommunityPage() {
   const navigate = useNavigate();
   const [selectedCity, setSelectedCity] = useState({ id: 6, name: "Nashik", state: "Maharashtra", communities: 27 });
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("grid");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // --- Loading Simulation ---
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // --- Already Joined Communities ---
   const [joinedCommunities, setJoinedCommunities] = useState([
@@ -414,6 +438,85 @@ export default function CommunityPage() {
       </div>
     );
   };
+
+  // --- SKELETON VIEW ---
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F6F5F1] pb-24">
+        <div className="mx-auto max-w-md">
+          <header className="bg-white border-b border-slate-100 px-5 py-4 sticky top-0 z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <SkeletonText className="w-32 h-6" />
+                <div className="flex items-center gap-1 mt-0.5">
+                  <SkeletonBox className="w-3 h-3 rounded-full" />
+                  <SkeletonText className="w-24 h-3" />
+                  <SkeletonBox className="w-3 h-3 rounded-full" />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <SkeletonBox className="w-10 h-10 rounded-full" />
+                <SkeletonBox className="w-10 h-10 rounded-full" />
+              </div>
+            </div>
+            <div className="mt-4 relative">
+              <SkeletonBox className="w-4 h-4 rounded-full absolute left-4 top-1/2 -translate-y-1/2" />
+              <SkeletonBox className="w-full h-11 rounded-xl" />
+            </div>
+          </header>
+          <div className="p-5">
+            {/* My Communities Skeleton */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <SkeletonText className="w-32 h-5" />
+                <SkeletonText className="w-12 h-3" />
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                <SkeletonBox className="w-40 h-32 rounded-xl flex-shrink-0" />
+                <SkeletonBox className="w-40 h-32 rounded-xl flex-shrink-0" />
+                <SkeletonBox className="w-40 h-32 rounded-xl flex-shrink-0" />
+              </div>
+            </div>
+            {/* City Header Skeleton */}
+            <div className="bg-white rounded-xl p-4 border border-slate-100">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <SkeletonBox className="w-10 h-10 rounded-lg" />
+                  <div>
+                    <SkeletonText className="w-24 h-3" />
+                    <SkeletonText className="w-32 h-5" />
+                  </div>
+                </div>
+                <SkeletonText className="w-16 h-3" />
+              </div>
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100">
+                <SkeletonText className="w-24 h-3" />
+                <SkeletonText className="w-20 h-3" />
+              </div>
+            </div>
+            {/* Filter Skeleton */}
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex gap-2">
+                <SkeletonBox className="w-20 h-8 rounded-full" />
+                <SkeletonBox className="w-20 h-8 rounded-full" />
+              </div>
+              <div className="flex gap-1">
+                <SkeletonBox className="w-8 h-8 rounded-lg" />
+                <SkeletonBox className="w-8 h-8 rounded-lg" />
+              </div>
+            </div>
+            {/* Grid Skeleton */}
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              <SkeletonBox className="h-48 rounded-lg" />
+              <SkeletonBox className="h-48 rounded-lg" />
+              <SkeletonBox className="h-48 rounded-lg" />
+              <SkeletonBox className="h-48 rounded-lg" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F6F5F1] pb-24">

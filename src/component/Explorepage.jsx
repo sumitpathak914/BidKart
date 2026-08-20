@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MapPin,
   ChevronDown,
@@ -25,6 +25,23 @@ const THEME = {
   goldSoft: "#FDF3E1",
   mapBg: "#E7ECFA",
 };
+
+// --- SKELETON LOADER COMPONENTS ---
+const Shimmer = () => (
+  <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+);
+
+const SkeletonBox = ({ className }) => (
+  <div className={`relative overflow-hidden bg-slate-200 rounded-xl ${className}`}>
+    <Shimmer />
+  </div>
+);
+
+const SkeletonText = ({ className }) => (
+  <div className={`relative overflow-hidden bg-slate-200 rounded-full ${className}`}>
+    <Shimmer />
+  </div>
+);
 
 const FILTERS = [
   { id: "all", label: "All", icon: Store },
@@ -133,6 +150,100 @@ function MapPinMarker({ pin }) {
 export default function ExplorePage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Loading Simulation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // --- SKELETON VIEW ---
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F6F5F1] pb-24">
+        <div className="mx-auto max-w-md">
+          <header className="px-5 pt-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <SkeletonBox className="w-6 h-6 rounded-full" />
+                  <SkeletonText className="w-32 h-4" />
+                  <SkeletonBox className="w-4 h-4 rounded-full" />
+                </div>
+                <div className="mt-1">
+                  <SkeletonText className="w-40 h-5" />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <SkeletonBox className="w-10 h-10 rounded-full" />
+                <SkeletonBox className="w-10 h-10 rounded-full" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-3">
+              <SkeletonBox className="flex-1 h-[52px] rounded-2xl" />
+              <SkeletonBox className="w-[68px] h-[52px] rounded-2xl" />
+            </div>
+            <div className="mt-4 flex gap-2 overflow-x-auto px-0 pb-1">
+              <SkeletonBox className="w-20 h-9 rounded-full flex-shrink-0" />
+              <SkeletonBox className="w-24 h-9 rounded-full flex-shrink-0" />
+              <SkeletonBox className="w-20 h-9 rounded-full flex-shrink-0" />
+              <SkeletonBox className="w-20 h-9 rounded-full flex-shrink-0" />
+            </div>
+          </header>
+          <SkeletonBox className="relative mx-5 mt-4 h-[300px] overflow-hidden rounded-3xl" />
+          <section className="mt-6 px-5">
+            <div className="flex items-center justify-between">
+              <SkeletonText className="w-40 h-6" />
+              <div className="flex items-center gap-1">
+                <SkeletonText className="w-10 h-4" />
+                <SkeletonBox className="w-4 h-4 rounded-full" />
+              </div>
+            </div>
+            <div className="mt-4 flex flex-col gap-3">
+              <div className="flex gap-3 rounded-2xl bg-white p-3 shadow-sm shadow-slate-200/70">
+                <SkeletonBox className="h-24 w-24 rounded-xl flex-shrink-0" />
+                <div className="flex flex-1 flex-col gap-2">
+                  <SkeletonText className="w-3/4 h-4" />
+                  <SkeletonText className="w-1/2 h-3" />
+                  <SkeletonText className="w-1/3 h-3" />
+                  <div className="flex items-center justify-between mt-auto pt-1.5">
+                    <SkeletonText className="w-20 h-3" />
+                    <SkeletonBox className="w-16 h-7 rounded-lg" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 rounded-2xl bg-white p-3 shadow-sm shadow-slate-200/70">
+                <SkeletonBox className="h-24 w-24 rounded-xl flex-shrink-0" />
+                <div className="flex flex-1 flex-col gap-2">
+                  <SkeletonText className="w-3/4 h-4" />
+                  <SkeletonText className="w-1/2 h-3" />
+                  <SkeletonText className="w-1/3 h-3" />
+                  <div className="flex items-center justify-between mt-auto pt-1.5">
+                    <SkeletonText className="w-20 h-3" />
+                    <SkeletonBox className="w-16 h-7 rounded-lg" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 rounded-2xl bg-white p-3 shadow-sm shadow-slate-200/70">
+                <SkeletonBox className="h-24 w-24 rounded-xl flex-shrink-0" />
+                <div className="flex flex-1 flex-col gap-2">
+                  <SkeletonText className="w-3/4 h-4" />
+                  <SkeletonText className="w-1/2 h-3" />
+                  <SkeletonText className="w-1/3 h-3" />
+                  <div className="flex items-center justify-between mt-auto pt-1.5">
+                    <SkeletonText className="w-20 h-3" />
+                    <SkeletonBox className="w-16 h-7 rounded-lg" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F6F5F1] pb-24">
       <div className="mx-auto max-w-md">
