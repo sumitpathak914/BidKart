@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect } from "react"; // <--- ADDED THIS IMPORT
 import AllAuctionsPage from "./component/AllAuctionsPage";
 import AuctionDetailsPage from "./component/AuctionDetailsPage";
 import BottomNav from "./component/BottomNav";
@@ -20,12 +21,22 @@ import MyStockPage from "./component/MyStockPage";
 function LayoutWithBottomNav() {
   const location = useLocation();
 
+  // --- FIX: Automatically Scroll to Top on every page change ---
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   // List of paths where you DO NOT want the Bottom Navigation to show
   const hideBottomNavPaths = [
     "/scan-qr",
-    "/shop", // Hides on /shop/1, /shop/2, etc.
-    "/auction", // Hides on /auction/1, /auction/2, etc.
+    "/shop",
+    "/auction",
     "/community-chat",
+    "/my-listings",
+    "/my-listing-details",
+    "/my-community",
+    "/my-customers",
+    "/my-stock",
   ];
 
   // Check if the current pathname starts with any of the paths in the list
