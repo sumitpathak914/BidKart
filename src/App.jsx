@@ -10,6 +10,11 @@ import ProfilePage from "./component/ProfilePage";
 import QRScannerPage from "./component/QRScannerPage";
 import SellPage from "./component/SellPage";
 import ShopDetailsPage from "./component/ShopDetailsPage";
+import MyListingsPage from "./component/MyListingsPage";
+import MyListingDetailsPage from "./component/MyListingDetailsPage";
+import MyCommunityPage from "./component/MyCommunityPage";
+import MyCustomersPage from "./component/MyCustomersPage";
+import MyStockPage from "./component/MyStockPage";
 
 // Helper component to conditionally show the BottomNav
 function LayoutWithBottomNav() {
@@ -46,6 +51,11 @@ function LayoutWithBottomNav() {
           path="/community-chat/:communityId"
           element={<CommunityChatPage />}
         />
+        <Route path="/my-listings" element={<MyListingsPage />} />
+        <Route path="/my-listing-details/:listingId" element={<MyListingDetailsPage />} />
+        <Route path="/my-community" element={<MyCommunityPage />} />
+        <Route path="/my-customers" element={<MyCustomersPage />} />
+        <Route path="/my-stock" element={<MyStockPage />} />
       </Routes>
 
       {/* Conditionally render BottomNav */}
