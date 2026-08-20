@@ -16,6 +16,8 @@ import MyListingDetailsPage from "./component/MyListingDetailsPage";
 import MyCommunityPage from "./component/MyCommunityPage";
 import MyCustomersPage from "./component/MyCustomersPage";
 import MyStockPage from "./component/MyStockPage";
+import BiddingDashboardPage from "./component/BiddingDashboardPage";
+import BiddingDetailsPage from "./component/BiddingDetailsPage";
 
 // Helper component to conditionally show the BottomNav
 function LayoutWithBottomNav() {
@@ -67,6 +69,8 @@ function LayoutWithBottomNav() {
         <Route path="/my-community" element={<MyCommunityPage />} />
         <Route path="/my-customers" element={<MyCustomersPage />} />
         <Route path="/my-stock" element={<MyStockPage />} />
+        <Route path="/bidding-dashboard" element={<BiddingDashboardPage />} />
+        <Route path="/bidding-details/:auctionId" element={<BiddingDetailsPage />} />
       </Routes>
 
       {/* Conditionally render BottomNav */}

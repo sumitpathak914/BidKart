@@ -143,13 +143,13 @@ export default function ProfilePage() {
       desc: "My Bids - Items you have placed bids on",
       count: 24,
     },
-    {
-      id: "won",
-      label: "Won Auctions",
-      icon: Trophy,
-      desc: "Items you have won",
-      count: 12,
-    },
+    // {
+    //   id: "won",
+    //   label: "Won Auctions",
+    //   icon: Trophy,
+    //   desc: "Items you have won",
+    //   count: 12,
+    // },
 
     {
       id: "settings",
@@ -461,13 +461,22 @@ export default function ProfilePage() {
     </div>
   );
 
-  const renderAccountOptions = () => (
+   const renderAccountOptions = () => (
     <div className="space-y-3">
       {accountOptions.map((option) => {
         const Icon = option.icon;
         return (
           <button
             key={option.id}
+            onClick={() => {
+              // --- ADDED NAVIGATION LOGIC FOR PROFILE ---
+              if (option.id === "profile") {
+                navigate("/shop/1"); // Navigate to your Shop Details Page (ID: 1)
+              }else if (option.id === "bids") {
+                navigate("/bidding-dashboard"); // <-- Add this line
+              }
+              // ------------------------------------
+            }}
             className="w-full bg-white rounded-xl p-4 border border-slate-100 text-left hover:shadow-md transition-shadow"
           >
             <div className="flex items-center gap-3">
