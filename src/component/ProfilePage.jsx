@@ -37,6 +37,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { getUser, isLoggedIn, logoutUser } from "./userSession";
 
 const THEME = {
   ink: "#0F1638",
@@ -49,12 +50,33 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("business");
   const [userType, setUserType] = useState("business"); // "business" or "customer"
 
+  useEffect(() => {
+    // Check if user is logged in
+    if (!isLoggedIn()) {
+      navigate("/");
+      return;
+    }
 
+    // Get user data from localStorage
+    const user = getUser();
+    if (user) {
+      // setUserData(user);
+
+      // Determine user role
+      const role = user.user.role;
+
+      // Set userType based on role
+      if (role === "business") {
+        setUserType("business");
+      } else {
+        setUserType("customer");
+      }
+    }
+  }, []);
   const handleLogout = () => {
-   
-    window.location.href = "/login"; // Redirect to homepage after logout
+    logoutUser();
+    window.location.href = "/"; // Redirect to homepage after logout
   };
-
 
   // --- NEW: State for Switch Business Modal ---
   const [showSwitchModal, setShowSwitchModal] = useState(false);

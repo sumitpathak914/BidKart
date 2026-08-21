@@ -58,12 +58,13 @@ export default function LoginPage() {
     const savedUser = localStorage.getItem("bidkart_user");
     const token = localStorage.getItem("bidkart_token");
     if (savedUser && token) {
-      navigate("/");
+      navigate("/home");
     }
   }, [navigate]);
 
   // Login Handler
   const handleLogin = async (e) => {
+    debugger;
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -83,11 +84,11 @@ export default function LoginPage() {
         localStorage.setItem("bidkart_token", data.data.token);
 
         // Store user role for later use
-        const userRole = data.data.role || data.data.userType || "customer";
+        const userRole = data.data.user.role || data.data.userType || null;
         localStorage.setItem("bidkart_user_role", userRole);
 
         alert("Login successful!");
-        navigate("/");
+        navigate("/home");
       } else {
         setError(data.message || "Invalid credentials");
       }
