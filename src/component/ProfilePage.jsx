@@ -1,41 +1,42 @@
 import {
-    ArrowRight,
-    BadgeCheck,
-    Boxes,
-    CheckCircle,
-    Check as CheckIcon,
-    ChevronRight,
-    Copy,
-    Download,
-    Edit2,
-    Gavel,
-    HelpCircle,
-    IdCard,
-    List,
-    LogOut,
-    Mail,
-    MapPin,
-    MessageCircle,
-    Phone,
-    QrCode,
-    Settings,
-    Share2, // Added for KYC
-    ShieldAlert,
-    ShoppingBag,
-    Star,
-    Store,
-    TrendingUp, // Added for KYC
-    Upload,
-    User,
-    UserCircle,
-    Users,
-    Users2,
-    X,
-    Zap,
+  ArrowRight,
+  BadgeCheck,
+  Boxes,
+  CheckCircle,
+  Check as CheckIcon,
+  ChevronRight,
+  Copy,
+  Download,
+  Edit2,
+  Gavel,
+  HelpCircle,
+  IdCard,
+  List,
+  LogOut,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  QrCode,
+  Settings,
+  Share2, // Added for KYC
+  ShieldAlert,
+  ShoppingBag,
+  Star,
+  Store,
+  TrendingUp, // Added for KYC
+  Upload,
+  User,
+  UserCircle,
+  Users,
+  Users2,
+  X,
+  Zap,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const THEME = {
   ink: "#0F1638",
@@ -47,7 +48,29 @@ const THEME = {
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("business");
   const [userType, setUserType] = useState("business"); // "business" or "customer"
+  const { user, isAuthenticated, logout } = useAuth();
 
+  const handleLogout = () => {
+    logout();
+    window.location.href = "/login"; // Redirect to homepage after logout
+  };
+
+  useEffect(() => {
+    if (user) {
+      // Determine user type from role
+      const role = user.role || user.userType || user.accountType;
+
+      if (role === "business" || role === "seller" || role === "vendor") {
+        setUserType("business");
+      } else {
+        setUserType("customer");
+      }
+      // setIsLoading(false);
+    } else if (isAuthenticated === false) {
+      // setIsLoading(false);
+    }
+  }, [user, isAuthenticated]);
+  console.log(user, "login user details ");
   // --- NEW: State for Switch Business Modal ---
   const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [switchForm, setSwitchForm] = useState({
@@ -819,13 +842,16 @@ export default function ProfilePage() {
               <p className="text-xs text-slate-500">Manage your account</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+              <button
+                onClick={handleLogout}
+                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+              >
                 <LogOut size={20} className="text-slate-500" />
               </button>
             </div>
           </div>
 
-          <div className="flex gap-2 mt-4 bg-slate-100 p-1 rounded-xl">
+          {/* <div className="flex gap-2 mt-4 bg-slate-100 p-1 rounded-xl">
             <button
               onClick={() => setUserType("business")}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${userType === "business" ? "bg-white text-[#0F1638] shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
@@ -844,7 +870,7 @@ export default function ProfilePage() {
                 Customer
               </div>
             </button>
-          </div>
+          </div> */}
         </header>
 
         <div className="p-5 space-y-6">
