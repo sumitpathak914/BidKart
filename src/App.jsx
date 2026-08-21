@@ -37,7 +37,7 @@ function LayoutWithBottomNav() {
   }, [location.pathname]);
 
   // Hide BottomNav ONLY on "/my-community" page
-  const shouldHideBottomNav = location.pathname === "/my-community";
+  const shouldHideBottomNav = location.pathname === "/my-community" || "/";
   
   // Show BottomNav on all pages EXCEPT "/my-community"
   const showBottomNav = !shouldHideBottomNav;
