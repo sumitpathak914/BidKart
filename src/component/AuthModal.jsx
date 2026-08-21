@@ -1,7 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { X, Mail, Lock, User, Briefcase, UserPlus, LogIn, Building, MapPin, Eye, EyeOff } from "lucide-react";
-import { useApp } from "../context/AppContext";
+import {
+    Briefcase,
+    Eye,
+    EyeOff,
+    Lock,
+    LogIn,
+    Mail,
+    MapPin,
+    User,
+    UserPlus
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useApp } from "../context/AppContext";
 
 const THEME = {
   ink: "#0F1638",
@@ -26,14 +36,23 @@ export default function LoginPage() {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
 
   // Register State (Customer)
-  const [customerData, setCustomerData] = useState({ 
-    name: "", email: "", mobile: "", password: "" 
+  const [customerData, setCustomerData] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    password: "",
   });
 
   // Register State (Business)
   const [businessData, setBusinessData] = useState({
-    name: "", email: "", mobile: "", password: "",
-    businessName: "", panNumber: "", gstNumber: "", businessAddress: ""
+    name: "",
+    email: "",
+    mobile: "",
+    password: "",
+    businessName: "",
+    panNumber: "",
+    gstNumber: "",
+    businessAddress: "",
   });
 
   // Check if already logged in
@@ -61,7 +80,7 @@ export default function LoginPage() {
       if (data.success) {
         login(data.data, data.data.token);
         alert("Login successful!");
-        navigate("/");
+        navigate("/home");
       } else {
         setError(data.message || "Invalid credentials");
       }
@@ -105,15 +124,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#F6F5F1] flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
-        
         {/* Header */}
         <div
           className="relative p-6 pt-8 text-white text-center"
-          style={{ background: `linear-gradient(135deg, ${THEME.ink} 0%, #1a2a5c 100%)` }}
+          style={{
+            background: `linear-gradient(135deg, ${THEME.ink} 0%, #1a2a5c 100%)`,
+          }}
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
           <div className="absolute bottom-0 left-0 w-20 h-20 bg-[#D9A441]/10 rounded-full -ml-10 -mb-10"></div>
-          
+
           <div className="relative z-10">
             <div className="w-20 h-20 bg-[#D9A441] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               <span className="text-3xl font-extrabold text-white">B</span>
@@ -122,7 +142,9 @@ export default function LoginPage() {
               {mode === "login" ? "Welcome Back!" : "Create Account"}
             </h2>
             <p className="text-sm text-white/80">
-              {mode === "login" ? "Login to continue bidding" : "Join our community today"}
+              {mode === "login"
+                ? "Login to continue bidding"
+                : "Join our community today"}
             </p>
           </div>
         </div>
@@ -135,8 +157,8 @@ export default function LoginPage() {
               <button
                 onClick={() => setRole("customer")}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                  role === "customer" 
-                    ? "bg-white shadow-sm text-[#0F1638]" 
+                  role === "customer"
+                    ? "bg-white shadow-sm text-[#0F1638]"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -147,8 +169,8 @@ export default function LoginPage() {
               <button
                 onClick={() => setRole("business")}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                  role === "business" 
-                    ? "bg-white shadow-sm text-[#0F1638]" 
+                  role === "business"
+                    ? "bg-white shadow-sm text-[#0F1638]"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -170,24 +192,34 @@ export default function LoginPage() {
           {mode === "login" && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="relative">
-                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
                 <input
                   type="email"
                   placeholder="Email Address"
                   required
                   value={loginData.email}
-                  onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                  onChange={(e) =>
+                    setLoginData({ ...loginData, email: e.target.value })
+                  }
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
                 />
               </div>
               <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   required
                   value={loginData.password}
-                  onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                  onChange={(e) =>
+                    setLoginData({ ...loginData, password: e.target.value })
+                  }
                   className="w-full pl-10 pr-12 py-3.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
                 />
                 <button
@@ -217,7 +249,9 @@ export default function LoginPage() {
                 placeholder="Full Name"
                 required
                 value={customerData.name}
-                onChange={(e) => setCustomerData({ ...customerData, name: e.target.value })}
+                onChange={(e) =>
+                  setCustomerData({ ...customerData, name: e.target.value })
+                }
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
               />
               <input
@@ -225,7 +259,9 @@ export default function LoginPage() {
                 placeholder="Email Address"
                 required
                 value={customerData.email}
-                onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
+                onChange={(e) =>
+                  setCustomerData({ ...customerData, email: e.target.value })
+                }
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
               />
               <input
@@ -233,17 +269,27 @@ export default function LoginPage() {
                 placeholder="Mobile Number"
                 required
                 value={customerData.mobile}
-                onChange={(e) => setCustomerData({ ...customerData, mobile: e.target.value })}
+                onChange={(e) =>
+                  setCustomerData({ ...customerData, mobile: e.target.value })
+                }
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
               />
               <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   required
                   value={customerData.password}
-                  onChange={(e) => setCustomerData({ ...customerData, password: e.target.value })}
+                  onChange={(e) =>
+                    setCustomerData({
+                      ...customerData,
+                      password: e.target.value,
+                    })
+                  }
                   className="w-full pl-10 pr-12 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
                 />
                 <button
@@ -260,7 +306,8 @@ export default function LoginPage() {
                 className="w-full py-3.5 rounded-xl text-white font-bold shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-[1.01] active:scale-95 disabled:opacity-70"
                 style={{ backgroundColor: THEME.ink }}
               >
-                <UserPlus size={18} /> {loading ? "Creating..." : "Register as Customer"}
+                <UserPlus size={18} />{" "}
+                {loading ? "Creating..." : "Register as Customer"}
               </button>
             </form>
           )}
@@ -273,7 +320,9 @@ export default function LoginPage() {
                 placeholder="Full Name"
                 required
                 value={businessData.name}
-                onChange={(e) => setBusinessData({ ...businessData, name: e.target.value })}
+                onChange={(e) =>
+                  setBusinessData({ ...businessData, name: e.target.value })
+                }
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
               />
               <input
@@ -281,7 +330,9 @@ export default function LoginPage() {
                 placeholder="Email Address"
                 required
                 value={businessData.email}
-                onChange={(e) => setBusinessData({ ...businessData, email: e.target.value })}
+                onChange={(e) =>
+                  setBusinessData({ ...businessData, email: e.target.value })
+                }
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
               />
               <input
@@ -289,17 +340,27 @@ export default function LoginPage() {
                 placeholder="Mobile Number"
                 required
                 value={businessData.mobile}
-                onChange={(e) => setBusinessData({ ...businessData, mobile: e.target.value })}
+                onChange={(e) =>
+                  setBusinessData({ ...businessData, mobile: e.target.value })
+                }
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
               />
               <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   required
                   value={businessData.password}
-                  onChange={(e) => setBusinessData({ ...businessData, password: e.target.value })}
+                  onChange={(e) =>
+                    setBusinessData({
+                      ...businessData,
+                      password: e.target.value,
+                    })
+                  }
                   className="w-full pl-10 pr-12 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
                 />
                 <button
@@ -315,7 +376,12 @@ export default function LoginPage() {
                 placeholder="Business Name"
                 required
                 value={businessData.businessName}
-                onChange={(e) => setBusinessData({ ...businessData, businessName: e.target.value })}
+                onChange={(e) =>
+                  setBusinessData({
+                    ...businessData,
+                    businessName: e.target.value,
+                  })
+                }
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
               />
               <input
@@ -323,7 +389,12 @@ export default function LoginPage() {
                 placeholder="PAN Number"
                 required
                 value={businessData.panNumber}
-                onChange={(e) => setBusinessData({ ...businessData, panNumber: e.target.value })}
+                onChange={(e) =>
+                  setBusinessData({
+                    ...businessData,
+                    panNumber: e.target.value,
+                  })
+                }
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
               />
               <input
@@ -331,17 +402,30 @@ export default function LoginPage() {
                 placeholder="GST Number"
                 required
                 value={businessData.gstNumber}
-                onChange={(e) => setBusinessData({ ...businessData, gstNumber: e.target.value })}
+                onChange={(e) =>
+                  setBusinessData({
+                    ...businessData,
+                    gstNumber: e.target.value,
+                  })
+                }
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
               />
               <div className="relative">
-                <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <MapPin
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
                 <input
                   type="text"
                   placeholder="Business Address"
                   required
                   value={businessData.businessAddress}
-                  onChange={(e) => setBusinessData({ ...businessData, businessAddress: e.target.value })}
+                  onChange={(e) =>
+                    setBusinessData({
+                      ...businessData,
+                      businessAddress: e.target.value,
+                    })
+                  }
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
                 />
               </div>
@@ -351,7 +435,8 @@ export default function LoginPage() {
                 className="w-full py-3.5 rounded-xl text-white font-bold shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-[1.01] active:scale-95 disabled:opacity-70"
                 style={{ backgroundColor: THEME.ink }}
               >
-                <Briefcase size={18} /> {loading ? "Registering..." : "Register as Business"}
+                <Briefcase size={18} />{" "}
+                {loading ? "Registering..." : "Register as Business"}
               </button>
             </form>
           )}
@@ -359,7 +444,9 @@ export default function LoginPage() {
           {/* Switch between Login/Register */}
           <div className="mt-6 text-center text-sm">
             <span className="text-slate-500">
-              {mode === "login" ? "Don't have an account?" : "Already have an account?"}
+              {mode === "login"
+                ? "Don't have an account?"
+                : "Already have an account?"}
             </span>
             <button
               onClick={() => {
