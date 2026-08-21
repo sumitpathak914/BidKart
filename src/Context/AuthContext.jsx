@@ -1,54 +1,63 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("bidkart_user");
-    const storedToken = localStorage.getItem("bidkart_token");
-
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
+    // Check if user is logged in on mount
+    const savedUser = localStorage.getItem("bidkart_user");
+    const token = localStorage.getItem("bidkart_token");
+    
+    if (savedUser && token) {
+      try {
+        setUser(JSON.parse(savedUser));
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        localStorage.removeItem("bidkart_user");
+        localStorage.removeItem("bidkart_token");
+      }
     }
-
     setLoading(false);
   }, []);
 
-  const login = (userData, tokenData) => {
+  const login = (userData, token) => {
     localStorage.setItem("bidkart_user", JSON.stringify(userData));
-    localStorage.setItem("bidkart_token", tokenData);
-
+    localStorage.setItem("bidkart_token", token);
     setUser(userData);
-    setToken(tokenData);
+    setIsAuthenticated(true);
   };
 
   const logout = () => {
     localStorage.removeItem("bidkart_user");
     localStorage.removeItem("bidkart_token");
-
     setUser(null);
-    setToken(null);
+    setIsAuthenticated(false);
+  };
+
+  const value = {
+    user,
+    isAuthenticated,
+    loading,
+    login,
+    logout,
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        loading,
-        login,
-        logout,
-        isAuthenticated: !!token,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}
