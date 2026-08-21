@@ -7,11 +7,10 @@ import {
     Mail,
     MapPin,
     User,
-    UserPlus
+    UserPlus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../context/AppContext";
 
 const THEME = {
   ink: "#0F1638",
@@ -23,7 +22,6 @@ const THEME = {
 const API_URL = "http://localhost:5000/api/auth";
 
 export default function LoginPage() {
-  const { login, setShowAuthModal } = useApp();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState("login"); // login | register
@@ -58,11 +56,13 @@ export default function LoginPage() {
   // Check if already logged in
   useEffect(() => {
     const savedUser = localStorage.getItem("bidkart_user");
-    if (savedUser) {
-      navigate("/home");
+    const token = localStorage.getItem("bidkart_token");
+    if (savedUser && token) {
+      navigate("/");
     }
   }, [navigate]);
 
+  // Login Handler
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -78,9 +78,16 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        login(data.data, data.data.token);
+        // Save user data and token to localStorage
+        localStorage.setItem("bidkart_user", JSON.stringify(data.data));
+        localStorage.setItem("bidkart_token", data.data.token);
+
+        // Store user role for later use
+        const userRole = data.data.role || data.data.userType || "customer";
+        localStorage.setItem("bidkart_user_role", userRole);
+
         alert("Login successful!");
-        navigate("/home");
+        navigate("/");
       } else {
         setError(data.message || "Invalid credentials");
       }
@@ -91,6 +98,7 @@ export default function LoginPage() {
     }
   };
 
+  // Register Handler
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -108,7 +116,14 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        login(data.data, data.data.token);
+        // Save user data and token to localStorage
+        localStorage.setItem("bidkart_user", JSON.stringify(data.data));
+        localStorage.setItem("bidkart_token", data.data.token);
+
+        // Store user role
+        const userRole = role;
+        localStorage.setItem("bidkart_user_role", userRole);
+
         alert("Registration successful!");
         navigate("/");
       } else {
