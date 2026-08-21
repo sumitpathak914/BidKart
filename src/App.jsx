@@ -36,10 +36,13 @@ function LayoutWithBottomNav() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Hide BottomNav ONLY on "/my-community" page
-  const shouldHideBottomNav = location.pathname === "/my-community" || "/";
+  // Pages where BottomNav should NOT show
+  const hideBottomNavPaths = ["/", "/my-community"];
   
-  // Show BottomNav on all pages EXCEPT "/my-community"
+  // Check if current path should hide BottomNav
+  const shouldHideBottomNav = hideBottomNavPaths.includes(location.pathname);
+  
+  // Show BottomNav on all pages EXCEPT hidden paths
   const showBottomNav = !shouldHideBottomNav;
 
   console.log("Path:", location.pathname);
@@ -71,7 +74,7 @@ function LayoutWithBottomNav() {
         <Route path="/bidding-details/:auctionId" element={<BiddingDetailsPage />} />
       </Routes>
       
-      {/* BottomNav - Show on all pages EXCEPT "/my-community" */}
+      {/* BottomNav - Show on all pages EXCEPT "/" and "/my-community" */}
       {showBottomNav && <BottomNav />}
     </div>
   );
