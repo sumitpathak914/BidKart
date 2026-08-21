@@ -22,24 +22,14 @@ import KycPage from "./component/KycPage";
 import SettingsPage from "./component/SettingsPage";
 import HelpAndSupportPage from "./component/HelpAndSupportPage";
 import LoginPage from "./component/AuthModal";
-import { AppProvider, useApp } from "./context/AppContext";
 
-// Protected Route Component using AppContext
-function ProtectedRoute({ children }) {
-  const { user } = useApp(); // Use AppContext instead of AuthContext
-  const location = useLocation();
 
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
 
-  return children;
-}
 
-// Helper component to conditionally show the BottomNav
+
+
 function LayoutWithBottomNav() {
   const location = useLocation();
-  const { user } = useApp(); // Use AppContext
 
   // Automatically Scroll to Top on every page change
   useEffect(() => {
@@ -75,108 +65,108 @@ function LayoutWithBottomNav() {
         <Route path="/login" element={<LoginPage />} />
         
         {/* Protected Routes */}
-        <Route path="/" element={
-          <ProtectedRoute>
+        <Route path="/home" element={
+         
             <HomePage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/explore" element={
-          <ProtectedRoute>
+         
             <ExplorePage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/sell" element={
-          <ProtectedRoute>
+         
             <SellPage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/community" element={
-          <ProtectedRoute>
+         
             <CommunityPage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/profile" element={
-          <ProtectedRoute>
+          
             <ProfilePage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/scan-qr" element={
-          <ProtectedRoute>
+          
             <QRScannerPage />
-          </ProtectedRoute>
+          
         } />
         <Route path="/shop/:shopId" element={
-          <ProtectedRoute>
+         
             <ShopDetailsPage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/auction/:auctionId" element={
-          <ProtectedRoute>
+          
             <AuctionDetailsPage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/all-auctions" element={
-          <ProtectedRoute>
+         
             <AllAuctionsPage />
-          </ProtectedRoute>
+          
         } />
         <Route path="/community-chat/:communityId" element={
-          <ProtectedRoute>
+         
             <CommunityChatPage />
-          </ProtectedRoute>
+          
         } />
         <Route path="/settings" element={
-          <ProtectedRoute>
+         
             <SettingsPage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/my-listings" element={
-          <ProtectedRoute>
+         
             <MyListingsPage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/help" element={
-          <ProtectedRoute>
+        
             <HelpAndSupportPage />
-          </ProtectedRoute>
+          
         } />
         <Route path="/my-listing-details/:listingId" element={
-          <ProtectedRoute>
+          
             <MyListingDetailsPage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/kyc" element={
-          <ProtectedRoute>
+          
             <KycPage />
-          </ProtectedRoute>
+          
         } />
         <Route path="/my-community" element={
-          <ProtectedRoute>
+        
             <MyCommunityPage />
-          </ProtectedRoute>
+          
         } />
         <Route path="/my-customers" element={
-          <ProtectedRoute>
+         
             <MyCustomersPage />
-          </ProtectedRoute>
+          
         } />
         <Route path="/my-stock" element={
-          <ProtectedRoute>
+          
             <MyStockPage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/bidding-dashboard" element={
-          <ProtectedRoute>
+         
             <BiddingDashboardPage />
-          </ProtectedRoute>
+         
         } />
         <Route path="/bidding-details/:auctionId" element={
-          <ProtectedRoute>
+          
             <BiddingDetailsPage />
-          </ProtectedRoute>
+         
         } />
       </Routes>
-      {!isLoginPage && shouldShowBottomNav && user && <BottomNav />}
+      {!isLoginPage && shouldShowBottomNav  && <BottomNav />}
     </div>
   );
 }
@@ -184,9 +174,9 @@ function LayoutWithBottomNav() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppProvider>
+     
         <LayoutWithBottomNav />
-      </AppProvider>
+     
     </BrowserRouter>
   );
 }

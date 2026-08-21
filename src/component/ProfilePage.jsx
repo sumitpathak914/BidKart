@@ -48,29 +48,14 @@ const THEME = {
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("business");
   const [userType, setUserType] = useState("business"); // "business" or "customer"
-  const { user, isAuthenticated, logout } = useAuth();
+
 
   const handleLogout = () => {
-    logout();
+   
     window.location.href = "/login"; // Redirect to homepage after logout
   };
 
-  useEffect(() => {
-    if (user) {
-      // Determine user type from role
-      const role = user.role || user.userType || user.accountType;
 
-      if (role === "business" || role === "seller" || role === "vendor") {
-        setUserType("business");
-      } else {
-        setUserType("customer");
-      }
-      // setIsLoading(false);
-    } else if (isAuthenticated === false) {
-      // setIsLoading(false);
-    }
-  }, [user, isAuthenticated]);
-  console.log(user, "login user details ");
   // --- NEW: State for Switch Business Modal ---
   const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [switchForm, setSwitchForm] = useState({
