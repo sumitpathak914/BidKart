@@ -18,6 +18,24 @@ import {
   Filter,
   Grid,
   List,
+  Home,
+  Bookmark,
+  TrendingUp,
+  User,
+  Image as ImageIcon,
+  Calendar,
+  Eye,
+  ShoppingBag,
+  Store,
+  Package,
+  Tag,
+  Sparkles,
+  Scissors,
+  Droplet,
+  Shirt,
+  Gem,
+  Wifi,
+  Coffee
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -28,7 +46,7 @@ const THEME = {
   mapBg: "#E7ECFA",
 };
 
-// --- SKELETON LOADER COMPONENTS ---
+// --- SKELETON LOADER ---
 const Shimmer = () => (
   <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 );
@@ -51,392 +69,438 @@ export default function CommunityPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("grid");
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("following");
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
 
-  // --- Loading Simulation ---
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
-  // --- Already Joined Communities ---
-  const [joinedCommunities, setJoinedCommunities] = useState([
+  // --- Shop/Business Categories ---
+  const categories = [
+    { id: 1, name: "All", icon: Store },
+    { id: 2, name: "Clothing", icon: Shirt },
+    { id: 3, name: "Beauty", icon: Sparkles },
+    { id: 4, name: "Jewelry", icon: Gem },
+    { id: 5, name: "Salon", icon: Scissors },
+    { id: 6, name: "Skin Care", icon: Droplet },
+    { id: 7, name: "Fashion", icon: Tag },
+    { id: 8, name: "Lifestyle", icon: Coffee },
+  ];
+
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  // --- Mock Data: Followed Shops/Communities ---
+  const [followedShops, setFollowedShops] = useState([
     {
-      id: 99,
-      name: "Pune Cycle Club",
-      category: "Sports",
+      id: 1,
+      name: "Trendy Threads",
+      shopType: "Clothing Store",
+      category: "Clothing",
       members: 1634,
-      image: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&q=80",
+      image: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80",
       rating: 4.7,
-      location: "Pune",
+      location: "Nashik",
       isVerified: true,
+      owner: "Priya Sharma",
+      posts: [
+        {
+          id: 1,
+          author: "Priya Sharma",
+          authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
+          content: "🛍️ New Summer Collection Arrived! 20% off on all ethnic wear. Visit our store at College Road.",
+          time: "2 hours ago",
+          likes: 45,
+          comments: 12,
+          images: ["https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=400&q=80"],
+          pinned: true
+        },
+        {
+          id: 2,
+          author: "Priya Sharma",
+          authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
+          content: "👗 Exclusive Designer Sarees just arrived! Limited pieces available. DM for bookings.",
+          time: "5 hours ago",
+          likes: 23,
+          comments: 8,
+          images: ["https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&q=80"],
+          pinned: false
+        }
+      ]
     },
     {
-      id: 98,
-      name: "Nashik Tech Enthusiasts",
-      category: "Technology",
+      id: 2,
+      name: "Glow Beauty Salon",
+      shopType: "Beauty & Salon",
+      category: "Beauty",
       members: 1247,
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80",
+      image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80",
       rating: 4.8,
       location: "Nashik",
       isVerified: true,
+      owner: "Sneha Patel",
+      posts: [
+        {
+          id: 3,
+          author: "Sneha Patel",
+          authorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
+          content: "💄 Bridal Makeup Offers! Book your appointment now for wedding season. Free trial session.",
+          time: "1 day ago",
+          likes: 67,
+          comments: 24,
+          images: ["https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"],
+          pinned: false
+        }
+      ]
     },
     {
-      id: 97,
-      name: "Nashik Foodies",
-      category: "Food & Dining",
+      id: 3,
+      name: "Royal Jewelers",
+      shopType: "Jewelry Store",
+      category: "Jewelry",
       members: 789,
-      image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80",
+      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&q=80",
       rating: 4.9,
       location: "Nashik",
       isVerified: true,
+      owner: "Amit Gupta",
+      posts: [
+        {
+          id: 4,
+          author: "Amit Gupta",
+          authorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80",
+          content: "💎 Gold Rate Update! Special discounts on gold jewelry this week. Visit our showroom.",
+          time: "3 hours ago",
+          likes: 34,
+          comments: 15,
+          images: ["https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&q=80"],
+          pinned: false
+        }
+      ]
     },
+    {
+      id: 4,
+      name: "Nature's Touch Skincare",
+      shopType: "Skin Care Products",
+      category: "Skin Care",
+      members: 456,
+      image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&q=80",
+      rating: 4.6,
+      location: "Nashik",
+      isVerified: false,
+      owner: "Meera Joshi",
+      posts: [
+        {
+          id: 5,
+          author: "Meera Joshi",
+          authorImage: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&q=80",
+          content: "🌿 New Organic Skincare Range! Pure, natural, and chemical-free products. Free samples available.",
+          time: "6 hours ago",
+          likes: 28,
+          comments: 9,
+          images: ["https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&q=80"],
+          pinned: false
+        }
+      ]
+    }
+  ]);
+
+  // --- Mock Data: City Shop Posts ---
+  const [cityShopPosts, setCityShopPosts] = useState([
+    {
+      id: 101,
+      shopName: "Trendy Threads",
+      shopImage: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=100&q=80",
+      shopType: "Clothing Store",
+      author: "Priya Sharma",
+      authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
+      content: "🛍️ New Summer Collection Arrived! 20% off on all ethnic wear. Visit our store at College Road.",
+      time: "2 hours ago",
+      likes: 89,
+      comments: 34,
+      members: 1634,
+      images: ["https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=400&q=80"],
+      pinned: true,
+      isVerified: true,
+      category: "Clothing"
+    },
+    {
+      id: 102,
+      shopName: "Glow Beauty Salon",
+      shopImage: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=100&q=80",
+      shopType: "Beauty & Salon",
+      author: "Sneha Patel",
+      authorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
+      content: "💄 Bridal Makeup Offers! Book your appointment now for wedding season. Free trial session.",
+      time: "1 day ago",
+      likes: 67,
+      comments: 24,
+      members: 1247,
+      images: ["https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"],
+      pinned: false,
+      isVerified: true,
+      category: "Beauty"
+    },
+    {
+      id: 103,
+      shopName: "Royal Jewelers",
+      shopImage: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100&q=80",
+      shopType: "Jewelry Store",
+      author: "Amit Gupta",
+      authorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80",
+      content: "💎 Gold Rate Update! Special discounts on gold jewelry this week. Visit our showroom.",
+      time: "3 hours ago",
+      likes: 45,
+      comments: 18,
+      members: 789,
+      images: ["https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&q=80"],
+      pinned: false,
+      isVerified: true,
+      category: "Jewelry"
+    },
+    {
+      id: 104,
+      shopName: "Nature's Touch Skincare",
+      shopImage: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=100&q=80",
+      shopType: "Skin Care Products",
+      author: "Meera Joshi",
+      authorImage: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&q=80",
+      content: "🌿 New Organic Skincare Range! Pure, natural, and chemical-free products. Free samples available.",
+      time: "6 hours ago",
+      likes: 28,
+      comments: 9,
+      members: 456,
+      images: ["https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&q=80"],
+      pinned: false,
+      isVerified: false,
+      category: "Skin Care"
+    }
   ]);
 
   const popularCities = [
-    { id: 1, name: "Mumbai", state: "Maharashtra", communities: 45 },
-    { id: 2, name: "Pune", state: "Maharashtra", communities: 38 },
-    { id: 3, name: "Aurangabad", state: "Maharashtra", communities: 27 },
-    { id: 4, name: "Nagpur", state: "Maharashtra", communities: 31 },
-    { id: 5, name: "Solapur", state: "Maharashtra", communities: 18 },
-    { id: 6, name: "Nashik", state: "Maharashtra", communities: 27 },
-    { id: 7, name: "Kolhapur", state: "Maharashtra", communities: 22 },
-    { id: 8, name: "Satara", state: "Maharashtra", communities: 14 },
-    { id: 9, name: "Nanded", state: "Maharashtra", communities: 12 },
-    { id: 10, name: "Amravati", state: "Maharashtra", communities: 16 },
+    { id: 1, name: "Mumbai", state: "Maharashtra", shops: 45 },
+    { id: 2, name: "Pune", state: "Maharashtra", shops: 38 },
+    { id: 3, name: "Aurangabad", state: "Maharashtra", shops: 27 },
+    { id: 4, name: "Nagpur", state: "Maharashtra", shops: 31 },
+    { id: 5, name: "Solapur", state: "Maharashtra", shops: 18 },
+    { id: 6, name: "Nashik", state: "Maharashtra", shops: 27 },
+    { id: 7, name: "Kolhapur", state: "Maharashtra", shops: 22 },
+    { id: 8, name: "Satara", state: "Maharashtra", shops: 14 },
   ];
 
-  // Communities data organized by city
-  const communitiesByCity = {
-    "Mumbai": [
-      {
-        id: 1,
-        name: "Mumbai Tech Hub",
-        category: "Technology",
-        members: 3247,
-        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80",
-        rating: 4.9,
-        posts: 567,
-        active: true,
-        description: "The largest tech community in Mumbai. Connect with developers, designers, and tech entrepreneurs.",
-        isVerified: true,
-        location: "Mumbai",
-      },
-      {
-        id: 2,
-        name: "Mumbai Foodies",
-        category: "Food & Dining",
-        members: 2892,
-        image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80",
-        rating: 4.8,
-        posts: 456,
-        active: true,
-        description: "Discover the best street food, fine dining, and hidden gems in Mumbai.",
-        isVerified: true,
-        location: "Mumbai",
-      },
-      {
-        id: 3,
-        name: "Mumbai Fashion Collective",
-        category: "Fashion",
-        members: 1894,
-        image: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80",
-        rating: 4.6,
-        posts: 234,
-        active: true,
-        description: "Fashion enthusiasts sharing trends, styling tips, and exclusive deals.",
-        isVerified: false,
-        location: "Mumbai",
-      },
-    ],
-    "Pune": [
-      {
-        id: 4,
-        name: "Pune Cycle Club",
-        category: "Sports",
-        members: 1634,
-        image: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&q=80",
-        rating: 4.7,
-        posts: 289,
-        active: true,
-        description: "Weekly rides, cycle maintenance workshops, and cycling events in Pune.",
-        isVerified: true,
-        location: "Pune",
-      },
-      {
-        id: 5,
-        name: "Pune Photography Club",
-        category: "Arts & Photography",
-        members: 1456,
-        image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80",
-        rating: 4.5,
-        posts: 198,
-        active: true,
-        description: "Photography walks, workshops, and sharing beautiful captures of Pune.",
-        isVerified: true,
-        location: "Pune",
-      },
-    ],
-    "Nashik": [
-      {
-        id: 6,
-        name: "Nashik Tech Enthusiasts",
-        category: "Technology",
-        members: 1247,
-        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80",
-        rating: 4.8,
-        posts: 234,
-        active: true,
-        description: "Connect with tech lovers in Nashik. Share knowledge and stay updated.",
-        isVerified: true,
-        location: "Nashik",
-      },
-      {
-        id: 7,
-        name: "Nashik Home Decor",
-        category: "Home & Living",
-        members: 856,
-        image: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=400&q=80",
-        rating: 4.4,
-        posts: 156,
-        active: true,
-        description: "Share home decor ideas, renovation tips, and find unique furniture in Nashik.",
-        isVerified: false,
-        location: "Nashik",
-      },
-      {
-        id: 8,
-        name: "Nashik Foodies",
-        category: "Food & Dining",
-        members: 789,
-        image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80",
-        rating: 4.9,
-        posts: 312,
-        active: true,
-        description: "Discover the best food spots in Nashik. Share recipes and food experiences.",
-        isVerified: true,
-        location: "Nashik",
-      },
-    ],
-    "Nagpur": [
-      {
-        id: 9,
-        name: "Nagpur Business Network",
-        category: "Business",
-        members: 956,
-        image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&q=80",
-        rating: 4.6,
-        posts: 178,
-        active: true,
-        description: "Connect with entrepreneurs, business owners, and professionals in Nagpur.",
-        isVerified: true,
-        location: "Nagpur",
-      },
-    ],
+  // Get category icon
+  const getCategoryIcon = (categoryName) => {
+    const category = categories.find(c => c.name === categoryName);
+    return category ? category.icon : Store;
   };
 
-  // Get communities for selected city
-  const getCityCommunities = () => {
-    if (!selectedCity) return [];
-    return communitiesByCity[selectedCity.name] || [];
+  // Format number
+  const formatNumber = (num) => {
+    if (num > 999) return `${(num/1000).toFixed(1)}k`;
+    return num;
   };
 
-  // --- Render Already Joined Communities ---
-  const renderJoinedCommunities = () => {
-    if (!selectedCity) return null;
-
-    const filteredJoined = joinedCommunities.filter(
-      (community) => community.location === selectedCity.name
-    );
-
-    if (filteredJoined.length === 0) return null;
-
-    return (
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="flex items-center gap-2 font-bold text-[#0F1638] text-[15px]">
-            <Check size={18} className="text-green-500" /> My Communities
-          </h3>
-          <button className="text-xs font-medium text-[#D9A441]">View All</button>
-        </div>
-        
-        <div className="flex gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {filteredJoined.map((community) => (
-            <div
-              key={community.id}
-              className="w-40 flex-shrink-0 bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm cursor-pointer transition-transform hover:scale-105"
-              onClick={() => navigate(`/community-chat/${community.id}`)} // Navigate Directly
-            >
-              <div className="relative h-20 w-full">
-                <img src={community.image} alt={community.name} className="w-full h-full object-cover" />
-                {community.isVerified && (
-                  <div className="absolute top-1 right-1 bg-blue-500 text-white p-0.5 rounded-full">
-                    <Check size={10} />
-                  </div>
-                )}
-              </div>
-              <div className="p-2">
-                <p className="text-[12px] font-bold text-[#0F1638] truncate">{community.name}</p>
-                <p className="text-[9px] text-slate-400 truncate">{community.category}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Users size={9} className="text-slate-400" />
-                  <span className="text-[9px] text-slate-400">{community.members.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+  // Filter shops by category
+  const getFilteredShops = () => {
+    if (selectedCategory === "All") return followedShops;
+    return followedShops.filter(shop => shop.category === selectedCategory);
   };
 
-  const renderCommunityFeed = () => {
-    const communities = getCityCommunities();
+  const getFilteredCityPosts = () => {
+    if (selectedCategory === "All") return cityShopPosts;
+    return cityShopPosts.filter(post => post.category === selectedCategory);
+  };
+
+  // --- Render Followed Shops Posts ---
+  const renderFollowedPosts = () => {
+    const filteredShops = getFilteredShops();
     
-    if (communities.length === 0) {
+    if (filteredShops.length === 0) {
       return (
-        <div className="text-center py-12">
-          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <UsersIcon size={36} className="text-slate-400" />
-          </div>
-          <h3 className="text-lg font-bold text-[#0F1638]">No Communities Yet</h3>
-          <p className="text-sm text-slate-500 mt-2">
-            Be the first to create a community in {selectedCity?.name}
-          </p>
-          <button className="mt-4 px-6 py-3 rounded-xl text-white font-semibold"
-            style={{ backgroundColor: THEME.gold }}
-          >
-            <Plus size={18} className="inline mr-2" />
-            Create Community
-          </button>
+        <div className="text-center py-8">
+          <Store size={48} className="text-slate-300 mx-auto mb-3" />
+          <h3 className="text-sm font-bold text-[#0F1638]">No Shops Followed</h3>
+          <p className="text-xs text-slate-500 mt-1">Follow shops to see their posts here</p>
         </div>
       );
     }
 
-    return (
-      <div className="space-y-6">
-        {/* City Header */}
-        <div className="bg-white rounded-xl p-4 border border-slate-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#FDF3E1] rounded-lg">
-                <Building2 size={20} className="text-[#D9A441]" />
+    return filteredShops.map((shop) => (
+      <div key={shop.id} className="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm mb-4">
+        {/* Shop Header */}
+        <div 
+          className="p-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-colors"
+          onClick={() => navigate(`/shop/${shop.id}`)}
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-200 flex-shrink-0">
+              <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-bold text-[#0F1638]">{shop.name}</p>
+                {shop.isVerified && <Check size={12} className="text-blue-500" />}
               </div>
-              <div>
-                <p className="text-sm text-slate-500">Communities in</p>
-                <p className="font-bold text-[#0F1638] text-lg">{selectedCity?.name}, {selectedCity?.state}</p>
+              <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                <span>{shop.shopType}</span>
+                <span>•</span>
+                <span className="flex items-center gap-0.5">
+                  <Users size={10} /> {formatNumber(shop.members)}
+                </span>
+                <span>•</span>
+                <span className="flex items-center gap-0.5">
+                  <Star size={10} className="fill-[#D9A441] text-[#D9A441]" /> {shop.rating}
+                </span>
               </div>
             </div>
-            <button 
-              onClick={() => {
-                const nextCity = selectedCity.name === "Nashik" ? popularCities.find(c => c.name === "Pune") : popularCities.find(c => c.name === "Nashik");
-                setSelectedCity(nextCity);
-              }}
-              className="text-sm font-medium text-[#D9A441] flex items-center gap-1"
-            >
-              <MapPin size={16} /> Change
-            </button>
           </div>
-          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100">
-            <span className="flex items-center gap-1 text-sm text-slate-500">
-              <Users size={16} /> {communities.reduce((acc, c) => acc + c.members, 0).toLocaleString()} total members
-            </span>
-            <span className="flex items-center gap-1 text-sm text-slate-500">
-              <MessageCircle size={16} /> {communities.reduce((acc, c) => acc + c.posts, 0)} posts
-            </span>
-          </div>
+          <ChevronRight size={16} className="text-slate-400" />
         </div>
 
-        {/* Filter & View Controls */}
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            <button className="px-4 py-2 rounded-full bg-white border border-slate-200 text-sm font-medium text-slate-600 flex items-center gap-2">
-              <Filter size={16} /> Filter
-            </button>
-            <button className="px-4 py-2 rounded-full bg-white border border-slate-200 text-sm font-medium text-slate-600 flex items-center gap-2">
-              <Star size={16} /> Top Rated
-            </button>
-          </div>
-          <div className="flex gap-1">
-            <button 
-              onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-[#FDF3E1] text-[#D9A441]" : "text-slate-400"}`}
-            >
-              <Grid size={18} />
-            </button>
-            <button 
-              onClick={() => setViewMode("list")}
-              className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-[#FDF3E1] text-[#D9A441]" : "text-slate-400"}`}
-            >
-              <List size={18} />
-            </button>
-          </div>
-        </div>
-
-        {/* Discover Grid */}
-        <div className={viewMode === "grid" ? "grid grid-cols-2 gap-2" : "space-y-2"}>
-          {communities.map((community) => (
-            <div
-              key={community.id}
-              className="bg-white rounded-lg overflow-hidden border border-slate-100 hover:shadow-md transition-shadow"
-            >
-              <div className="relative h-24 w-full">
-                <img
-                  src={community.image}
-                  alt={community.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-1.5 right-1.5 flex flex-col gap-1">
-                  {community.isVerified && (
-                    <span className="bg-blue-500 text-white text-[8px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                      <Check size={9} />
-                    </span>
-                  )}
-                  {community.active && (
-                    <span className="bg-green-500 text-white text-[8px] px-1.5 py-0.5 rounded-full">
-                      Live
-                    </span>
-                  )}
+        {/* Shop Posts */}
+        <div className="p-3 space-y-3">
+          {shop.posts.map((post) => (
+            <div key={post.id} className="border-b border-slate-50 last:border-0 pb-3 last:pb-0">
+              {/* Post Author */}
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-200 flex-shrink-0">
+                  <img src={post.authorImage} alt={post.author} className="w-full h-full object-cover" />
                 </div>
-                <div className="absolute bottom-1.5 left-1.5 bg-black/60 backdrop-blur-sm text-white text-[8px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                  <MapPin size={9} /> {community.location}
+                <div>
+                  <p className="text-xs font-medium text-[#0F1638]">{post.author}</p>
+                  <p className="text-[9px] text-slate-400">{post.time}</p>
                 </div>
+                {post.pinned && (
+                  <span className="ml-auto text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Pinned</span>
+                )}
               </div>
 
-              <div className="p-2.5">
-                <div className="flex items-start justify-between gap-1">
-                  <div className="flex-1">
-                    <h4 className="font-bold text-[#0F1638] text-[13px] truncate">{community.name}</h4>
-                    <p className="text-[10px] text-slate-500 truncate">{community.category}</p>
-                  </div>
-                  <div className="flex items-center gap-0.5 flex-shrink-0">
-                    <Star size={11} className="fill-[#D9A441] text-[#D9A441]" />
-                    <span className="text-[11px] font-semibold text-[#0F1638]">{community.rating}</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2 mt-1.5 text-[9px] text-slate-500">
-                  <span className="flex items-center gap-0.5">
-                    <Users size={10} /> {community.members > 999 ? `${(community.members/1000).toFixed(1)}k` : community.members}
-                  </span>
-                  <span className="flex items-center gap-0.5">
-                    <MessageCircle size={10} /> {community.posts}
-                  </span>
-                </div>
+              {/* Post Content */}
+              <p className="text-xs text-slate-700">{post.content}</p>
 
-                {/* JOIN BUTTON WITH CORRECT NAVIGATE */}
+              {/* Post Images */}
+              {post.images && post.images.length > 0 && (
+                <div className="mt-2 grid grid-cols-2 gap-1.5">
+                  {post.images.slice(0, 2).map((img, idx) => (
+                    <div key={idx} className="rounded-lg overflow-hidden bg-slate-100 h-24">
+                      <img src={img} alt="Post" className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Post Actions */}
+              <div className="flex items-center gap-4 mt-2 pt-1.5">
+                <button className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-red-500 transition-colors">
+                  <Heart size={13} /> {post.likes}
+                </button>
                 <button 
-                  onClick={() => navigate(`/community-chat/1`)}
-                  className="w-full mt-2 py-1.5 rounded-lg text-[10px] font-semibold text-white transition-colors hover:opacity-90"
-                  style={{ backgroundColor: THEME.ink }}
+                  onClick={() => navigate(`/community-chat/${shop.id}`)}
+                  className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-[#D9A441] transition-colors"
                 >
-                  Join
+                  <MessageCircle size={13} /> {post.comments}
+                </button>
+                <button className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-[#D9A441] transition-colors ml-auto">
+                  <Share2 size={13} /> Share
                 </button>
               </div>
             </div>
           ))}
         </div>
+
+        {/* View All Posts */}
+        <button 
+          onClick={() => navigate(`/shop/${shop.id}`)}
+          className="w-full py-2 text-center text-xs font-medium text-[#D9A441] bg-slate-50 hover:bg-slate-100 transition-colors border-t border-slate-100"
+        >
+          View All Posts
+        </button>
       </div>
-    );
+    ));
+  };
+
+  // --- Render City Shop Posts ---
+  const renderCityPosts = () => {
+    const filteredPosts = getFilteredCityPosts();
+
+    if (filteredPosts.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <Store size={48} className="text-slate-300 mx-auto mb-3" />
+          <h3 className="text-sm font-bold text-[#0F1638]">No Shop Posts</h3>
+          <p className="text-xs text-slate-500 mt-1">No shops have posted in {selectedCity.name} yet</p>
+        </div>
+      );
+    }
+
+    return filteredPosts.map((post) => (
+      <div key={post.id} className="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm mb-3">
+        {/* Shop Info */}
+        <div 
+          className="p-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2 cursor-pointer hover:bg-slate-100 transition-colors"
+          onClick={() => navigate(`/shop/${post.id}`)}
+        >
+          <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-200 flex-shrink-0">
+            <img src={post.shopImage} alt={post.shopName} className="w-full h-full object-cover" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-bold text-[#0F1638]">{post.shopName}</p>
+              {post.isVerified && <Check size={12} className="text-blue-500" />}
+            </div>
+            <div className="flex items-center gap-2 text-[10px] text-slate-500">
+              <span>{post.shopType}</span>
+              <span>•</span>
+              <span className="flex items-center gap-0.5">
+                <Users size={10} /> {formatNumber(post.members)}
+              </span>
+            </div>
+          </div>
+          <ChevronRight size={14} className="text-slate-400" />
+        </div>
+
+        {/* Post Content */}
+        <div className="p-3">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-200 flex-shrink-0">
+              <img src={post.authorImage} alt={post.author} className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-[#0F1638]">{post.author}</p>
+              <p className="text-[9px] text-slate-400">{post.time}</p>
+            </div>
+            {post.pinned && (
+              <span className="ml-auto text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Pinned</span>
+            )}
+          </div>
+
+          <p className="text-xs text-slate-700">{post.content}</p>
+
+          {post.images && post.images.length > 0 && (
+            <div className="mt-2 grid grid-cols-2 gap-1.5">
+              {post.images.slice(0, 2).map((img, idx) => (
+                <div key={idx} className="rounded-lg overflow-hidden bg-slate-100 h-24">
+                  <img src={img} alt="Post" className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center gap-4 mt-2 pt-1.5 border-t border-slate-50">
+            <button className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-red-500 transition-colors">
+              <Heart size={13} /> {post.likes}
+            </button>
+            <button className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-[#D9A441] transition-colors">
+              <MessageCircle size={13} /> {post.comments}
+            </button>
+            <button className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-[#D9A441] transition-colors ml-auto">
+              <Share2 size={13} /> Share
+            </button>
+          </div>
+        </div>
+      </div>
+    ));
   };
 
   // --- SKELETON VIEW ---
@@ -465,53 +529,32 @@ export default function CommunityPage() {
             </div>
           </header>
           <div className="p-5">
-            {/* My Communities Skeleton */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <SkeletonText className="w-32 h-5" />
-                <SkeletonText className="w-12 h-3" />
-              </div>
-              <div className="flex gap-3 overflow-x-auto pb-2">
-                <SkeletonBox className="w-40 h-32 rounded-xl flex-shrink-0" />
-                <SkeletonBox className="w-40 h-32 rounded-xl flex-shrink-0" />
-                <SkeletonBox className="w-40 h-32 rounded-xl flex-shrink-0" />
-              </div>
+            {/* Categories Skeleton */}
+            <div className="flex gap-2 overflow-x-auto pb-3">
+              {[1,2,3,4,5,6].map(i => (
+                <SkeletonBox key={i} className="w-20 h-8 rounded-full flex-shrink-0" />
+              ))}
             </div>
-            {/* City Header Skeleton */}
-            <div className="bg-white rounded-xl p-4 border border-slate-100">
-              <div className="flex items-center justify-between">
+            {/* Tabs Skeleton */}
+            <div className="flex bg-slate-100 p-1 rounded-xl mb-4">
+              <SkeletonBox className="flex-1 h-9 rounded-lg" />
+              <SkeletonBox className="flex-1 h-9 rounded-lg" />
+            </div>
+            {/* Posts Skeleton */}
+            {[1,2].map(i => (
+              <div key={i} className="bg-white rounded-xl p-4 border border-slate-100 mb-3">
                 <div className="flex items-center gap-3">
-                  <SkeletonBox className="w-10 h-10 rounded-lg" />
+                  <SkeletonBox className="w-12 h-12 rounded-lg" />
                   <div>
+                    <SkeletonText className="w-32 h-4" />
                     <SkeletonText className="w-24 h-3" />
-                    <SkeletonText className="w-32 h-5" />
                   </div>
                 </div>
-                <SkeletonText className="w-16 h-3" />
+                <SkeletonText className="w-full h-4 mt-3" />
+                <SkeletonText className="w-3/4 h-4 mt-1" />
+                <SkeletonBox className="w-full h-24 mt-2 rounded-lg" />
               </div>
-              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100">
-                <SkeletonText className="w-24 h-3" />
-                <SkeletonText className="w-20 h-3" />
-              </div>
-            </div>
-            {/* Filter Skeleton */}
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex gap-2">
-                <SkeletonBox className="w-20 h-8 rounded-full" />
-                <SkeletonBox className="w-20 h-8 rounded-full" />
-              </div>
-              <div className="flex gap-1">
-                <SkeletonBox className="w-8 h-8 rounded-lg" />
-                <SkeletonBox className="w-8 h-8 rounded-lg" />
-              </div>
-            </div>
-            {/* Grid Skeleton */}
-            <div className="grid grid-cols-2 gap-2 mt-4">
-              <SkeletonBox className="h-48 rounded-lg" />
-              <SkeletonBox className="h-48 rounded-lg" />
-              <SkeletonBox className="h-48 rounded-lg" />
-              <SkeletonBox className="h-48 rounded-lg" />
-            </div>
+            ))}
           </div>
         </div>
       </div>
@@ -525,12 +568,9 @@ export default function CommunityPage() {
         <header className="bg-white border-b border-slate-100 px-5 py-4 sticky top-0 z-10">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-[#0F1638]">Communities</h1>
+              <h1 className="text-xl font-bold text-[#0F1638]">Community</h1>
               <button 
-                onClick={() => {
-                  const nextCity = selectedCity.name === "Nashik" ? popularCities.find(c => c.name === "Pune") : popularCities.find(c => c.name === "Nashik");
-                  setSelectedCity(nextCity);
-                }}
+                onClick={() => setShowCityDropdown(!showCityDropdown)}
                 className="text-xs text-slate-500 flex items-center gap-1 mt-0.5"
               >
                 <MapPin size={12} className="text-[#D9A441]" />
@@ -539,15 +579,9 @@ export default function CommunityPage() {
               </button>
             </div>
             <div className="flex items-center gap-3">
-              <button
-                aria-label="Notifications"
-                className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm"
-              >
+              <button className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
                 <Bell size={17} style={{ color: THEME.ink }} />
-                <span
-                  className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                  style={{ backgroundColor: THEME.gold }}
-                >
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ backgroundColor: THEME.gold }}>
                   5
                 </span>
               </button>
@@ -559,12 +593,38 @@ export default function CommunityPage() {
             </div>
           </div>
 
+          {/* City Dropdown */}
+          {showCityDropdown && (
+            <div className="absolute left-5 right-5 mt-2 bg-white rounded-xl shadow-lg border border-slate-100 p-2 z-20 max-h-60 overflow-y-auto">
+              {popularCities.map((city) => (
+                <button
+                  key={city.id}
+                  onClick={() => {
+                    setSelectedCity(city);
+                    setShowCityDropdown(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
+                    selectedCity.id === city.id ? 'bg-[#FDF3E1] text-[#0F1638]' : 'hover:bg-slate-50'
+                  }`}
+                >
+                  <div>
+                    <span className="font-medium">{city.name}</span>
+                    <span className="text-xs text-slate-400 ml-2">{city.state}</span>
+                  </div>
+                  <span className="text-xs text-slate-400">{city.shops} shops</span>
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Search Bar */}
           <div className="mt-4 relative">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder={`Search communities in ${selectedCity?.name}...`}
+              placeholder={`Search shops in ${selectedCity?.name}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:border-[#D9A441] focus:outline-none transition-colors bg-slate-50"
             />
           </div>
@@ -572,8 +632,55 @@ export default function CommunityPage() {
 
         {/* Main Content */}
         <div className="p-5">
-          {renderJoinedCommunities()}
-          {renderCommunityFeed()}
+          
+          {/* Categories */}
+          <div className="flex gap-2 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {categories.map((category) => {
+              const Icon = category.icon;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.name)}
+                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                    selectedCategory === category.name 
+                      ? 'bg-[#0F1638] text-white' 
+                      : 'bg-white text-slate-600 border border-slate-200'
+                  }`}
+                >
+                  <Icon size={14} />
+                  {category.name}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tabs */}
+          <div className="flex bg-slate-100 p-1 rounded-xl mb-4">
+            <button
+              onClick={() => setActiveTab("following")}
+              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                activeTab === "following" ? "bg-white text-[#0F1638] shadow-sm" : "text-slate-500"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <Bookmark size={15} /> Following
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab("city")}
+              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                activeTab === "city" ? "bg-white text-[#0F1638] shadow-sm" : "text-slate-500"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <TrendingUp size={15} /> City Posts
+              </div>
+            </button>
+          </div>
+
+          {/* Posts */}
+          {activeTab === "following" ? renderFollowedPosts() : renderCityPosts()}
+          
         </div>
       </div>
     </div>

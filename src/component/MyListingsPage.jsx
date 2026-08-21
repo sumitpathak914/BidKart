@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Plus,
@@ -128,12 +128,12 @@ export default function MyListingsPage() {
             </button>
             <h1 className="text-[17px] font-bold text-[#0F1638]">My Listings</h1>
           </div>
-          <button 
-            onClick={() => alert("Create New Listing form will open here!")}
+          <Link 
+            to="/sell"
             className="flex items-center gap-1 px-3 py-1.5 bg-[#0F1638] text-white text-xs font-bold rounded-full hover:opacity-90 transition-colors"
           >
             <Plus size={14} /> New
-          </button>
+          </Link>
         </header>
 
         <div className="px-4 pt-4 pb-6 space-y-4">

@@ -36,8 +36,11 @@ function LayoutWithBottomNav() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Simple check - show BottomNav on all pages EXCEPT "/"
-  const showBottomNav = location.pathname !== "/";
+  // Hide BottomNav ONLY on "/my-community" page
+  const shouldHideBottomNav = location.pathname === "/my-community";
+  
+  // Show BottomNav on all pages EXCEPT "/my-community"
+  const showBottomNav = !shouldHideBottomNav;
 
   console.log("Path:", location.pathname);
   console.log("Show BottomNav:", showBottomNav);
@@ -68,7 +71,7 @@ function LayoutWithBottomNav() {
         <Route path="/bidding-details/:auctionId" element={<BiddingDetailsPage />} />
       </Routes>
       
-      {/* BottomNav - Only show when NOT on login page */}
+      {/* BottomNav - Show on all pages EXCEPT "/my-community" */}
       {showBottomNav && <BottomNav />}
     </div>
   );

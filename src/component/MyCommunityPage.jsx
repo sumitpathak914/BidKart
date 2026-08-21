@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   Plus,
@@ -11,7 +11,17 @@ import {
   Crown,
   ShieldCheck,
   X,
+  Loader2,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Calendar,
+  User,
+  Mail,
+  Phone,
+  Award
 } from "lucide-react";
+import { getToken, isLoggedIn } from "./userSession";
 
 const THEME = {
   ink: "#0F1638",
@@ -20,52 +30,224 @@ const THEME = {
   mapBg: "#E7ECFA",
 };
 
+const API_URL = "http://localhost:5000/api/communities";
+
 export default function MyCommunityPage() {
   const navigate = useNavigate();
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const location = useLocation();
   
-  // --- Mock Data for existing community ---
-  const [communityData, setCommunityData] = useState({
-    id: 1,
-    name: "Nashik Tech Enthusiasts",
-    category: "Technology",
-    members: 1247,
-    location: "Nashik",
-    rating: 4.8,
-    description: "Connect with tech lovers in Nashik. Share knowledge and stay updated.",
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80",
-    isVerified: true,
-  });
-
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [shopId, setShopId] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [communityData, setCommunityData] = useState(null);
+  const [hasCommunity, setHasCommunity] = useState(false);
+  const [memberCount, setMemberCount] = useState(0);
+  const [postCount, setPostCount] = useState(0);
+  const [eventCount, setEventCount] = useState(0);
+  const [recentMembers, setRecentMembers] = useState([]);
+  const [ownerName, setOwnerName] = useState("");
+  const [createdDate, setCreatedDate] = useState("");
+  
   const [formData, setFormData] = useState({ 
     name: "", 
     category: "", 
     location: "", 
-    description: "" 
+    description: "",
+    visibility: "public",
+    join_approval: false,
+    logo_url: "",
+    cover_image_url: ""
   });
 
-  // Check if user already has a community (Limit: 1)
-  const hasCommunity = !!communityData.name;
+  // Get shopId from URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const id = searchParams.get('shopId');
+    if (id) {
+      setShopId(id);
+    }
+  }, [location]);
 
-  const handleCreateCommunity = (e) => {
-    e.preventDefault();
-    if (!hasCommunity) {
-      setCommunityData({
-        id: Date.now(),
-        name: formData.name,
-        category: formData.category,
-        location: formData.location,
-        description: formData.description,
-        members: 1,
-        rating: 0,
-        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80",
-        isVerified: false,
+  // Check if user is logged in and fetch community
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      navigate("/");
+      return;
+    }
+    fetchMyCommunity();
+  }, []);
+
+  // Fetch My Community
+  const fetchMyCommunity = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      
+      const token = getToken();
+      if (!token) {
+        navigate("/");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/my-community`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
-      setShowCreateModal(false);
-      setFormData({ name: "", category: "", location: "", description: "" });
-      alert("Community created successfully!");
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (data.data && data.data.community) {
+          const community = data.data.community;
+          setCommunityData(community);
+          setHasCommunity(true);
+          
+          // Set counts from stats
+          if (data.data.stats) {
+            setMemberCount(data.data.stats.memberCount || 0);
+            setPostCount(data.data.stats.postCount || 0);
+            setEventCount(data.data.stats.eventCount || 0);
+          }
+          
+          // Set recent members
+          if (data.data.recentMembers && data.data.recentMembers.length > 0) {
+            setRecentMembers(data.data.recentMembers);
+            // Find owner
+            const owner = data.data.recentMembers.find(m => m.role === "owner");
+            if (owner) {
+              setOwnerName(owner.name || "Unknown");
+            }
+          }
+          
+          // Set created date
+          if (community.created_at) {
+            const date = new Date(community.created_at);
+            setCreatedDate(date.toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }));
+          }
+        } else {
+          setHasCommunity(false);
+          setCommunityData(null);
+        }
+      } else {
+        setError(data.message || "Failed to fetch community");
+        setHasCommunity(false);
+      }
+    } catch (err) {
+      console.error("Error fetching community:", err);
+      setError("Unable to connect to server. Please try again.");
+      setHasCommunity(false);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Create Community
+  const handleCreateCommunity = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.category || !formData.location || !formData.description) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    setSubmitting(true);
+    setError("");
+
+    try {
+      const token = getToken();
+      if (!token) {
+        navigate("/");
+        return;
+      }
+
+      const payload = {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        location: formData.location,
+        visibility: formData.visibility || "public",
+        join_approval: formData.join_approval || false,
+        logo_url: formData.logo_url || "",
+        cover_image_url: formData.cover_image_url || ""
+      };
+
+      const response = await fetch(`${API_URL}/create`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("Community created successfully!");
+        setShowCreateModal(false);
+        setFormData({ 
+          name: "", 
+          category: "", 
+          location: "", 
+          description: "",
+          visibility: "public",
+          join_approval: false,
+          logo_url: "",
+          cover_image_url: ""
+        });
+        await fetchMyCommunity();
+      } else {
+        setError(data.message || "Failed to create community");
+        alert(data.message || "Failed to create community");
+      }
+    } catch (err) {
+      console.error("Error creating community:", err);
+      setError("Unable to connect to server. Please try again.");
+      alert("Unable to connect to server. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Get visibility badge
+  const getVisibilityBadge = (visibility) => {
+    switch(visibility) {
+      case "public":
+        return <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Public</span>;
+      case "private":
+        return <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Private</span>;
+      default:
+        return null;
+    }
+  };
+
+  // Get status badge
+  const getStatusBadge = (isVerified) => {
+    if (isVerified) {
+      return <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Verified</span>;
+    }
+    return <span className="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">Pending</span>;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F6F5F1] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 size={40} className="text-[#D9A441] animate-spin mx-auto mb-4" />
+          <p className="text-slate-500">Loading community...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F6F5F1] pb-24">
@@ -92,6 +274,21 @@ export default function MyCommunityPage() {
         {/* Main Content */}
         <div className="px-4 pt-4 pb-6 space-y-4">
           
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2">
+              <AlertCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
+          {/* Shop ID Info */}
+          {shopId && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-2 text-xs text-blue-700 text-center">
+              Shop ID: #{shopId}
+            </div>
+          )}
+
           {/* If No Community Exists (Create Option) */}
           {!hasCommunity ? (
             <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
@@ -112,56 +309,137 @@ export default function MyCommunityPage() {
             </div>
           ) : (
             /* If Community Exists (View Mode) */
-            <div 
-              className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => navigate(`/community-chat/${communityData.id}`)}
-            >
-              <div className="flex gap-4">
-                <div className="w-20 h-20 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
-                  <img src={communityData.image} alt={communityData.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h3 className="text-[15px] font-bold text-[#0F1638]">{communityData.name}</h3>
-                        {communityData.isVerified && <ShieldCheck size={14} className="text-blue-500 fill-blue-500" />}
+            <div className="space-y-4">
+              {/* Main Community Card */}
+              <div 
+                className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => navigate(`/community-chat/${communityData.id}`)}
+              >
+                <div className="flex gap-4">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+                    {communityData.logo_url ? (
+                      <img src={communityData.logo_url} alt={communityData.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-[#FDF3E1] flex items-center justify-center">
+                        <Users size={30} className="text-[#D9A441]" />
                       </div>
-                      <p className="text-[11px] text-slate-500">{communityData.category}</p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Star size={14} className="fill-[#D9A441] text-[#D9A441]" />
-                      <span className="text-[13px] font-bold text-[#0F1638]">{communityData.rating}</span>
-                    </div>
+                    )}
                   </div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h3 className="text-[15px] font-bold text-[#0F1638]">{communityData.name}</h3>
+                          {communityData.is_verified === 1 && <ShieldCheck size={14} className="text-blue-500 fill-blue-500" />}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          <p className="text-[11px] text-slate-500">{communityData.category}</p>
+                          {getVisibilityBadge(communityData.visibility)}
+                          {getStatusBadge(communityData.is_verified === 1)}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star size={14} className="fill-[#D9A441] text-[#D9A441]" />
+                        <span className="text-[13px] font-bold text-[#0F1638]">{communityData.rating || 0}</span>
+                      </div>
+                    </div>
 
-                  <div className="flex items-center gap-3 mt-2 flex-wrap">
-                    <span className="flex items-center gap-1 text-[10px] text-slate-500">
-                      <MapPin size={12} /> {communityData.location}
-                    </span>
-                    <span className="flex items-center gap-1 text-[10px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full">
-                      <Users size={12} /> {communityData.members.toLocaleString()} Members
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 mt-1.5 line-clamp-2">{communityData.description}</p>
-                  
-                  <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-100">
-                    <button className="flex items-center gap-1 text-[10px] font-medium text-[#D9A441] hover:underline">
-                      View Details <ChevronRight size={12} />
-                    </button>
+                    <div className="flex items-center gap-3 mt-2 flex-wrap">
+                      <span className="flex items-center gap-1 text-[10px] text-slate-500">
+                        <MapPin size={12} /> {communityData.location}
+                      </span>
+                      <span className="flex items-center gap-1 text-[10px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full">
+                        <Users size={12} /> {memberCount} Members
+                      </span>
+                      {postCount > 0 && (
+                        <span className="flex items-center gap-1 text-[10px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full">
+                          <MessageCircle size={12} /> {postCount} Posts
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-600 mt-1.5 line-clamp-2">{communityData.description}</p>
+                    
+                    <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-100">
+                     <button 
+  onClick={() => navigate(`/community-chat/${communityData.id}`)}
+  className="flex items-center gap-1 text-[10px] font-medium text-[#D9A441] hover:underline"
+>
+  View Details <ChevronRight size={12} />
+</button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Info Banner (If community exists) */}
-          {hasCommunity && (
-            <div className="bg-[#FDF3E1]/50 border border-[#D9A441]/20 rounded-xl p-3 flex items-start gap-3">
-              <Crown size={16} className="text-[#D9A441] mt-0.5 flex-shrink-0" />
-              <div className="text-xs text-slate-600 flex-1">
-                <strong className="text-[#0F1638]">You are the Owner</strong><br />
-                As the community owner, you can manage members, moderate posts, and grow your community.
+              {/* Stats Cards */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-white rounded-xl p-3 border border-slate-100 text-center">
+                  <p className="text-xl font-bold text-[#0F1638]">{memberCount}</p>
+                  <p className="text-[9px] text-slate-500">Members</p>
+                </div>
+                <div className="bg-white rounded-xl p-3 border border-slate-100 text-center">
+                  <p className="text-xl font-bold text-[#0F1638]">{postCount}</p>
+                  <p className="text-[9px] text-slate-500">Posts</p>
+                </div>
+                <div className="bg-white rounded-xl p-3 border border-slate-100 text-center">
+                  <p className="text-xl font-bold text-[#0F1638]">{eventCount}</p>
+                  <p className="text-[9px] text-slate-500">Events</p>
+                </div>
+              </div>
+
+              {/* Community Info */}
+              <div className="bg-white rounded-xl p-4 border border-slate-100 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500">Created:</span>
+                  <span className="font-medium text-[#0F1638]">{createdDate || "N/A"}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500">Owner:</span>
+                  <span className="font-medium text-[#0F1638]">{ownerName || "You"}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500">Join Approval:</span>
+                  <span className="font-medium text-[#0F1638]">
+                    {communityData.join_approval === 1 ? "Required" : "Not Required"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Recent Members */}
+              {recentMembers.length > 0 && (
+                <div className="bg-white rounded-xl p-4 border border-slate-100">
+                  <h4 className="text-xs font-semibold text-[#0F1638] mb-3">Recent Members</h4>
+                  <div className="space-y-2">
+                    {recentMembers.slice(0, 3).map((member, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#FDF3E1] flex items-center justify-center">
+                          <User size={14} className="text-[#D9A441]" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs font-medium text-[#0F1638]">{member.name || "Unknown"}</p>
+                          <p className="text-[10px] text-slate-500">{member.role || "Member"}</p>
+                        </div>
+                        {member.role === "owner" && (
+                          <Crown size={14} className="text-[#D9A441]" />
+                        )}
+                      </div>
+                    ))}
+                    {recentMembers.length > 3 && (
+                      <p className="text-[10px] text-slate-400 text-center mt-2">
+                        +{recentMembers.length - 3} more members
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Info Banner */}
+              <div className="bg-[#FDF3E1]/50 border border-[#D9A441]/20 rounded-xl p-3 flex items-start gap-3">
+                <Crown size={16} className="text-[#D9A441] mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-slate-600 flex-1">
+                  <strong className="text-[#0F1638]">You are the Owner</strong><br />
+                  As the community owner, you can manage members, moderate posts, and grow your community.
+                </div>
               </div>
             </div>
           )}
@@ -172,12 +450,12 @@ export default function MyCommunityPage() {
       {/* Create Community Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-slide-up relative p-6">
+          <div className="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-slide-up relative p-6 max-h-[90vh] overflow-y-auto">
             
             {/* Close Button */}
             <button 
               onClick={() => setShowCreateModal(false)}
-              className="absolute top-4 right-4 p-1 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
+              className="absolute top-4 right-4 p-1 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors z-10"
             >
               <X size={20} className="text-slate-500" />
             </button>
@@ -192,9 +470,16 @@ export default function MyCommunityPage() {
               </div>
             </div>
 
+            {/* Error in modal */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-2 mb-3 text-xs text-red-600">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleCreateCommunity} className="space-y-3">
               <div>
-                <label className="text-[11px] font-semibold text-slate-600">Community Name</label>
+                <label className="text-[11px] font-semibold text-slate-600">Community Name *</label>
                 <input
                   type="text"
                   placeholder="e.g. Nashik Tech Enthusiasts"
@@ -205,7 +490,7 @@ export default function MyCommunityPage() {
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold text-slate-600">Category</label>
+                <label className="text-[11px] font-semibold text-slate-600">Category *</label>
                 <input
                   type="text"
                   placeholder="e.g. Technology, Sports, Food..."
@@ -216,7 +501,7 @@ export default function MyCommunityPage() {
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold text-slate-600">Location</label>
+                <label className="text-[11px] font-semibold text-slate-600">Location *</label>
                 <input
                   type="text"
                   placeholder="e.g. Nashik, Maharashtra"
@@ -227,7 +512,7 @@ export default function MyCommunityPage() {
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold text-slate-600">Description</label>
+                <label className="text-[11px] font-semibold text-slate-600">Description *</label>
                 <textarea
                   placeholder="Describe your community..."
                   rows={3}
@@ -237,12 +522,75 @@ export default function MyCommunityPage() {
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
               </div>
+              <div>
+                <label className="text-[11px] font-semibold text-slate-600">Visibility</label>
+                <div className="flex gap-3 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({...formData, visibility: "public"})}
+                    className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
+                      formData.visibility === "public" 
+                        ? "bg-[#0F1638] text-white" 
+                        : "bg-slate-50 text-slate-600"
+                    }`}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <Eye size={14} /> Public
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({...formData, visibility: "private"})}
+                    className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
+                      formData.visibility === "private" 
+                        ? "bg-[#0F1638] text-white" 
+                        : "bg-slate-50 text-slate-600"
+                    }`}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <EyeOff size={14} /> Private
+                    </div>
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="join_approval"
+                  checked={formData.join_approval}
+                  onChange={(e) => setFormData({...formData, join_approval: e.target.checked})}
+                  className="w-4 h-4 accent-[#D9A441]"
+                />
+                <label htmlFor="join_approval" className="text-xs text-slate-600">
+                  Require approval for new members
+                </label>
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-slate-600">Logo URL (Optional)</label>
+                <input
+                  type="url"
+                  placeholder="https://example.com/logo.png"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
+                  value={formData.logo_url}
+                  onChange={(e) => setFormData({...formData, logo_url: e.target.value})}
+                />
+              </div>
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl text-white font-bold shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-[1.01] active:scale-95"
+                disabled={submitting}
+                className="w-full py-3.5 rounded-xl text-white font-bold shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-[1.01] active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
                 style={{ backgroundColor: THEME.ink }}
               >
-                Create Community <Plus size={18} />
+                {submitting ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    Create Community <Plus size={18} />
+                  </>
+                )}
               </button>
             </form>
           </div>

@@ -616,12 +616,12 @@ export default function ShopDetailsPage() {
               </div>
             </div>
 
-            <button
+            {/* <button
               onClick={() => setIsFollowing(!isFollowing)}
               className={`px-5 py-2 rounded-lg border text-sm font-medium transition-colors ${isFollowing ? "border-slate-300 text-slate-600 bg-slate-50" : "border-[#5B4DFF] text-[#5B4DFF] bg-white"}`}
             >
               {isFollowing ? "Following" : "Follow"}
-            </button>
+            </button> */}
           </div>
 
           {/* Community Card */}
