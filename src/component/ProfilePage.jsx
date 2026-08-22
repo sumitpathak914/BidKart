@@ -40,7 +40,7 @@ const THEME = {
   mapBg: "#E7ECFA",
 };
 
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "http://test.aakarcanvassing.com/api/auth";
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("business");
@@ -714,7 +714,8 @@ export default function ProfilePage() {
                 // Pass shop ID (user ID) to KYC page
                 const userId = userData?.id || businessProfile?.id || 1;
                 navigate(`/kyc?shopId=${userId}`);
-              } else if (tool.id === "stock") {
+              }
+              else if (tool.id === "stock") {
                 navigate("/my-stock");
               }
             }}
@@ -782,13 +783,13 @@ export default function ProfilePage() {
       desc: "View & connect with your customer base",
       count: 158,
     },
-    {
-      id: "stock",
-      label: "My Stock",
-      icon: Boxes,
-      desc: "Manage inventory and stock levels",
-      count: 210,
-    },
+    // {
+    //   id: "stock",
+    //   label: "My Stock",
+    //   icon: Boxes,
+    //   desc: "Manage inventory and stock levels",
+    //   count: 210,
+    // },
   ];
 
   const accountOptions = [
@@ -819,41 +820,52 @@ export default function ProfilePage() {
     },
   ];
 
-  const renderAccountOptions = () => (
-    <div className="space-y-3">
-      {accountOptions.map((option) => {
-        const Icon = option.icon;
-        return (
-          <button
-            key={option.id}
-            onClick={() => {
-              if (option.id === "profile") {
-                navigate("/shop/1");
-              } else if (option.id === "bids") {
-                navigate("/bidding-dashboard");
-              } else if (option.id === "settings") {
-                navigate("/settings");
-              } else if (option.id === "help") {
-                navigate("/help");
+  // In ProfilePage.jsx, update the renderAccountOptions function:
+
+const renderAccountOptions = () => (
+  <div className="space-y-3">
+    {accountOptions.map((option) => {
+      const Icon = option.icon;
+      return (
+        <button
+          key={option.id}
+          onClick={() => {
+            // if (option.id === "profile") {
+            //   // Navigate to Business Profile page instead of shop page
+            //   navigate("/business-profile");
+            // } 
+            if (option.id === "profile") {
+                // Pass shop ID (user ID) to KYC page
+                const userId = userData?.id || businessProfile?.id || 1;
+                navigate(`/business-profile/${userId}`);
               }
-            }}
-            className="w-full bg-white rounded-xl p-4 border border-slate-100 text-left hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-slate-50 rounded-lg">
-                <Icon size={20} className="text-[#0F1638]" />
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-[#0F1638]">{option.label}</p>
-                <p className="text-xs text-slate-500">{option.desc}</p>
-              </div>
-              <ChevronRight size={18} className="text-slate-400" />
+            
+            
+            else if (option.id === "bids") {
+              navigate("/bidding-dashboard");
+            } else if (option.id === "settings") {
+              navigate("/settings");
+            } else if (option.id === "help") {
+              navigate("/help");
+            }
+          }}
+          className="w-full bg-white rounded-xl p-4 border border-slate-100 text-left hover:shadow-md transition-shadow"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-slate-50 rounded-lg">
+              <Icon size={20} className="text-[#0F1638]" />
             </div>
-          </button>
-        );
-      })}
-    </div>
-  );
+            <div className="flex-1">
+              <p className="font-semibold text-[#0F1638]">{option.label}</p>
+              <p className="text-xs text-slate-500">{option.desc}</p>
+            </div>
+            <ChevronRight size={18} className="text-slate-400" />
+          </div>
+        </button>
+      );
+    })}
+  </div>
+);
 
   const renderBusinessFeatures = () => (
     <div className="bg-[#FDF3E1] rounded-xl p-4 border border-[#D9A441]/30">

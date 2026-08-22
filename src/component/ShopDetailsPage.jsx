@@ -1,13 +1,13 @@
+import axios from "axios";
 import {
   ArrowLeft,
   BadgeCheck,
-  Box,
+  Check,
   CheckCircle,
   Clock,
   Gavel,
   Heart,
   MapPin,
-  MessageCircle,
   Package,
   Phone,
   Share2,
@@ -17,12 +17,12 @@ import {
   Store,
   Tag,
   Truck,
-  Users,
   UserPlus,
-  Check
+  Users
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { getToken, logoutUser } from "./userSession";
 
 const THEME = {
   ink: "#0F1638",
@@ -31,6 +31,8 @@ const THEME = {
   mapBg: "#E7ECFA",
   primary: "#5B4DFF",
 };
+
+const API_BASE_URL = "http://test.aakarcanvassing.com";
 
 // --- SKELETON LOADER COMPONENTS ---
 const Shimmer = () => (
@@ -49,160 +51,299 @@ const SkeletonText = ({ className }) => (
   </div>
 );
 
-// Mock database - Use this to fetch by ID
-const SHOPS_DB = {
-  1: {
-    id: 1,
-    name: "WoodNest Furniture",
-    owner: "Sumit Patil",
-    category: "Furniture Store",
-    rating: 4.8,
-    reviewsCount: 128,
-    location: "Nashik, Maharashtra",
-    fullAddress: "Shop No. 5, College Road, Nashik, Maharashtra 422001",
-    open: true,
-    closes: "9:00 PM",
-    verified: true,
-    shopIdDisplay: "WN2022",
-    description:
-      "Premium furniture store offering modern, stylish and durable furniture for your home and office. We specialize in wooden dining sets, comfortable sofas, and ergonomic office chairs.",
-    coverImage:
-      "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=800&q=80",
-    logoImage:
-      "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=200&q=80",
-    followers: 2345,
-    productCount: 156,
-    liveBids: 23,
-    soldItems: 312,
-    positiveRating: 98,
-    joinedDate: "Since 2022",
-
-    aboutStats: [
-      { icon: Shield, label: "Quality Products", desc: "Premium & durable" },
-      { icon: Tag, label: "Best Prices", desc: "Value for money" },
-      { icon: BadgeCheck, label: "Secure Payments", desc: "100% safe" },
-      { icon: Truck, label: "Fast Delivery", desc: "On time delivery" },
-    ],
-
-    products: [
-      {
-        id: 1,
-        name: "Modern Office Chair",
-        price: "₹ 6,500",
-        image:
-          "https://images.unsplash.com/photo-1505797055758-07d757a8f6db?w=400&q=80",
-      },
-      {
-        id: 2,
-        name: "Wooden Center Table",
-        price: "₹ 3,200",
-        image:
-          "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=400&q=80",
-      },
-      {
-        id: 3,
-        name: "King Size Bed",
-        price: "₹ 18,500",
-        image:
-          "https://images.unsplash.com/photo-1505693416388-b5d0685c4202?w=400&q=80",
-      },
-      {
-        id: 4,
-        name: "Bedside Table",
-        price: "₹ 2,100",
-        image:
-          "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=400&q=80",
-      },
-    ],
-
-    recentAuctions: [
-      {
-        id: 1,
-        title: "6 Seater Wooden Dining Table",
-        price: "₹ 12,500",
-        time: "02h 15m",
-        image:
-          "https://images.unsplash.com/photo-1615061687972-4fbae27c3c89?w=400&q=80",
-        bids: 18,
-      },
-      {
-        id: 2,
-        title: "Premium Fabric 3 Seater Sofa",
-        price: "₹ 8,200",
-        time: "0h 45m",
-        image:
-          "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80",
-        bids: 12,
-      },
-      {
-        id: 3,
-        title: "Wooden Rocking Chair",
-        price: "₹ 4,750",
-        time: "03h 30m",
-        image:
-          "https://images.unsplash.com/photo-1503602642458-2321114451cf?w=400&q=80",
-        bids: 9,
-      },
-    ],
-    reviews: [
-      {
-        id: 1,
-        name: "Rahul Sharma",
-        rating: 5,
-        date: "2 days ago",
-        comment:
-          "Amazing store! Great collection of furniture. The staff is very knowledgeable and helpful.",
-      },
-      {
-        id: 2,
-        name: "Priya Patel",
-        rating: 4,
-        date: "1 week ago",
-        comment:
-          "Good quality products. The delivery service is excellent. Would definitely recommend.",
-      },
-      {
-        id: 3,
-        name: "Amit Singh",
-        rating: 5,
-        date: "2 weeks ago",
-        comment:
-          "Best furniture shop in Nashik! Got my dream dining set here. Very reasonable prices.",
-      },
-    ],
-  },
-  2: {
-    id: 2,
-    name: "Cycle World Nashik",
-    description: "Premium bicycle store...",
-    coverImage:
-      "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=800&q=80",
-    reviews: [
-      { id: 1, name: "User", rating: 5, date: "today", comment: "Great" },
-    ],
-  },
-};
-
 export default function ShopDetailsPage() {
   const navigate = useNavigate();
   const { shopId } = useParams();
   const [activeTab, setActiveTab] = useState("portfolio");
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+
+  // State for Community Status
   const [isCommunityJoined, setIsCommunityJoined] = useState(false);
+  const [communityRole, setCommunityRole] = useState(null); // 'owner', 'member', or null
+  const [communityName, setCommunityName] = useState("Community");
+  const [hasCommunity, setHasCommunity] = useState(false);
+  const [communityId, setCommunityId] = useState(null);
+  const [isJoiningCommunity, setIsJoiningCommunity] = useState(false);
+
   const [shop, setShop] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Load data based on URL ID with loading simulation
-  useEffect(() => {
+  // Get auth token
+  const getAuthToken = () => {
+    return getToken();
+  };
+
+  // Follow/Join Community API
+  const followCommunity = async (communityId) => {
+    try {
+      setIsJoiningCommunity(true);
+      const token = getAuthToken();
+      
+      if (!token) {
+        setError("Please login to join community");
+        return;
+      }
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/communities/${communityId}/follow`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setIsCommunityJoined(true);
+        setCommunityRole("member");
+        // Show success message (optional)
+        console.log("Successfully joined community");
+      } else {
+        setError(response.data.message || "Failed to join community");
+      }
+    } catch (err) {
+      console.error("Error joining community:", err);
+      setError(err.response?.data?.message || "Unable to join community. Please try again.");
+    } finally {
+      setIsJoiningCommunity(false);
+    }
+  };
+
+  // Unfollow/Leave Community API
+  const unfollowCommunity = async (communityId) => {
+    try {
+      setIsJoiningCommunity(true);
+      const token = getAuthToken();
+      
+      if (!token) {
+        setError("Please login to leave community");
+        return;
+      }
+
+      const response = await axios.delete(
+        `${API_BASE_URL}/api/communities/${communityId}/unfollow`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setIsCommunityJoined(false);
+        setCommunityRole(null);
+        // Show success message (optional)
+        console.log("Successfully left community");
+      } else {
+        setError(response.data.message || "Failed to leave community");
+      }
+    } catch (err) {
+      console.error("Error leaving community:", err);
+      setError(err.response?.data?.message || "Unable to leave community. Please try again.");
+    } finally {
+      setIsJoiningCommunity(false);
+    }
+  };
+
+  // Handle Join/Leave button click
+  const handleCommunityAction = () => {
+    if (isCommunityJoined) {
+      // If already joined, leave the community
+      unfollowCommunity(communityId);
+    } else {
+      // If not joined, join the community
+      followCommunity(communityId);
+    }
+  };
+
+  // Fetch shop details from API
+  const fetchShopDetails = async () => {
     setIsLoading(true);
-    // Simulate API delay
-    const timer = setTimeout(() => {
-      const foundShop = SHOPS_DB[shopId] || SHOPS_DB[1];
-      setShop(foundShop);
+    setError(null);
+
+    const token = getAuthToken();
+    if (!token) {
+      setError("Please login to view shop details");
       setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/auth/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        params: { shopId: shopId },
+      });
+
+      if (response.data.success) {
+        const userData = response.data.data;
+        const businessDetails = userData.businessDetails;
+
+        // ✅ EXTRACT COMMUNITY DATA
+        let currentCommunity = null;
+        let communityExists = false;
+
+        if (userData.communities && userData.communities.length > 0) {
+          communityExists = true;
+          // Find the community that matches this specific shop/business ID
+          currentCommunity = userData.communities.find(
+            (comm) => comm.business_id === businessDetails?.id
+          ) || userData.communities[0]; // Fallback to first community if no match
+        }
+
+        // Set community state
+        setHasCommunity(communityExists);
+
+        if (currentCommunity) {
+          setCommunityId(currentCommunity.id);
+          setCommunityName(currentCommunity.name || "Community");
+
+          if (currentCommunity.my_status === "owner") {
+            setCommunityRole("owner");
+            setIsCommunityJoined(true);
+          } else if (
+            currentCommunity.my_status === "member" ||
+            currentCommunity.my_status === "admin"
+          ) {
+            setCommunityRole("member");
+            setIsCommunityJoined(true);
+          } else {
+            setCommunityRole(null);
+            setIsCommunityJoined(false);
+          }
+        } else {
+          setCommunityId(null);
+          setCommunityName("Community");
+          setCommunityRole(null);
+          setIsCommunityJoined(false);
+        }
+
+        // Transform API response to match shop structure
+        const transformedShop = {
+          id: userData.id,
+          business_id: businessDetails?.id || userData.id,
+          name: businessDetails?.business_name || userData.name,
+          owner: userData.name,
+          category: businessDetails?.business_type || "General Store",
+          rating: parseFloat(businessDetails?.rating) || 4.5,
+          reviewsCount: businessDetails?.total_reviews || 0,
+          location: `${businessDetails?.city || ""}, ${businessDetails?.state || ""}`,
+          fullAddress: businessDetails?.business_address || "Address not available",
+          open: true,
+          closes: businessDetails?.closing_time || "9:00 PM",
+          verified: userData.is_verified === 1,
+          shopIdDisplay: `SHOP${String(userData.id).padStart(4, "0")}`,
+          description: businessDetails?.about || "Welcome to our shop. We provide quality products and services.",
+          coverImage: businessDetails?.cover_image || "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=800&q=80",
+          logoImage: businessDetails?.logo || "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=200&q=80",
+          followers: 0,
+          productCount: 0,
+          liveBids: 0,
+          soldItems: 0,
+          positiveRating: 98,
+          joinedDate: businessDetails?.established_year ? `Since ${businessDetails.established_year}` : "Recently",
+          city: businessDetails?.city || "",
+          state: businessDetails?.state || "",
+          pincode: businessDetails?.pincode || "",
+          business_phone: businessDetails?.business_phone || "",
+          opening_time: businessDetails?.opening_time || "",
+          closing_time: businessDetails?.closing_time || "",
+          communityData: {
+            exists: communityExists,
+            id: currentCommunity?.id || null,
+            name: currentCommunity?.name || null,
+            status: currentCommunity?.my_status || null
+          },
+          aboutStats: [
+            { icon: Shield, label: "Quality Products", desc: "Premium & durable" },
+            { icon: Tag, label: "Best Prices", desc: "Value for money" },
+            { icon: BadgeCheck, label: "Secure Payments", desc: "100% safe" },
+            { icon: Truck, label: "Fast Delivery", desc: "On time delivery" },
+          ],
+          products: [
+            {
+              id: 1,
+              name: "Sample Product 1",
+              price: "₹ 500",
+              image: "https://images.unsplash.com/photo-1505797055758-07d757a8f6db?w=400&q=80",
+            },
+            {
+              id: 2,
+              name: "Sample Product 2",
+              price: "₹ 750",
+              image: "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=400&q=80",
+            },
+          ],
+          recentAuctions: [
+            {
+              id: 1,
+              title: "Premium Product Auction",
+              price: "₹ 1,200",
+              time: "02h 15m",
+              image: "https://images.unsplash.com/photo-1615061687972-4fbae27c3c89?w=400&q=80",
+              bids: 18,
+            },
+            {
+              id: 2,
+              title: "Limited Edition Item",
+              price: "₹ 800",
+              time: "0h 45m",
+              image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80",
+              bids: 12,
+            },
+          ],
+          reviews: [
+            {
+              id: 1,
+              name: "Customer 1",
+              rating: 5,
+              date: "2 days ago",
+              comment: "Great shop! Highly recommend.",
+            },
+            {
+              id: 2,
+              name: "Customer 2",
+              rating: 4,
+              date: "1 week ago",
+              comment: "Good quality products.",
+            },
+          ],
+        };
+
+        setShop(transformedShop);
+        setError(null);
+      } else {
+        setError(response.data.message || "Failed to load shop details");
+      }
+    } catch (err) {
+      console.error("Error fetching shop details:", err);
+
+      if (err.response?.status === 401) {
+        setError("Session expired. Please login again.");
+        logoutUser();
+        navigate("/login");
+      } else if (err.response?.status === 404) {
+        setError("Shop not found");
+      } else {
+        setError(err.response?.data?.message || "Unable to load shop details. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    if (shopId) {
+      fetchShopDetails();
+    }
   }, [shopId]);
 
   if (isLoading) {
@@ -234,10 +375,22 @@ export default function ShopDetailsPage() {
 
             {/* Skeleton Stats Row */}
             <div className="grid grid-cols-4 gap-2 mt-4 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
-              <div className="text-center"><SkeletonText className="w-10 h-5 mx-auto" /><SkeletonText className="w-12 h-3 mt-1 mx-auto" /></div>
-              <div className="text-center"><SkeletonText className="w-10 h-5 mx-auto" /><SkeletonText className="w-12 h-3 mt-1 mx-auto" /></div>
-              <div className="text-center"><SkeletonText className="w-10 h-5 mx-auto" /><SkeletonText className="w-12 h-3 mt-1 mx-auto" /></div>
-              <div className="text-center"><SkeletonText className="w-10 h-5 mx-auto" /><SkeletonText className="w-12 h-3 mt-1 mx-auto" /></div>
+              <div className="text-center">
+                <SkeletonText className="w-10 h-5 mx-auto" />
+                <SkeletonText className="w-12 h-3 mt-1 mx-auto" />
+              </div>
+              <div className="text-center">
+                <SkeletonText className="w-10 h-5 mx-auto" />
+                <SkeletonText className="w-12 h-3 mt-1 mx-auto" />
+              </div>
+              <div className="text-center">
+                <SkeletonText className="w-10 h-5 mx-auto" />
+                <SkeletonText className="w-12 h-3 mt-1 mx-auto" />
+              </div>
+              <div className="text-center">
+                <SkeletonText className="w-10 h-5 mx-auto" />
+                <SkeletonText className="w-12 h-3 mt-1 mx-auto" />
+              </div>
             </div>
 
             {/* Skeleton Community Card */}
@@ -266,7 +419,10 @@ export default function ShopDetailsPage() {
           {/* Skeleton Content Area */}
           <div className="px-5 pt-4 pb-6 space-y-4">
             <SkeletonBox className="w-full h-32 rounded-2xl" />
-            <div className="flex items-center justify-between"><SkeletonText className="w-32 h-5" /><SkeletonText className="w-16 h-5" /></div>
+            <div className="flex items-center justify-between">
+              <SkeletonText className="w-32 h-5" />
+              <SkeletonText className="w-16 h-5" />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <SkeletonBox className="w-full h-48 rounded-2xl" />
               <SkeletonBox className="w-full h-48 rounded-2xl" />
@@ -290,7 +446,35 @@ export default function ShopDetailsPage() {
     );
   }
 
-  if (!shop) return <div className="h-screen flex items-center justify-center">Loading...</div>;
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#F6F5F1] flex items-center justify-center">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-sm mx-4 max-w-md">
+          <Store size={64} className="mx-auto mb-4 text-slate-300" />
+          <h3 className="text-lg font-bold text-[#0F1638] mb-2">Oops!</h3>
+          <p className="text-sm text-slate-600">{error}</p>
+          {error.includes("login") && (
+            <button
+              onClick={() => navigate("/login")}
+              className="mt-4 px-6 py-2 bg-[#5B4DFF] text-white rounded-lg text-sm font-semibold"
+            >
+              Login
+            </button>
+          )}
+          {!error.includes("login") && (
+            <button
+              onClick={fetchShopDetails}
+              className="mt-4 px-6 py-2 bg-[#5B4DFF] text-white rounded-lg text-sm font-semibold"
+            >
+              Retry
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (!shop) return null;
 
   const renderPortfolio = () => (
     <div className="space-y-6">
@@ -309,13 +493,16 @@ export default function ShopDetailsPage() {
             <MapPin size={14} className="text-[#5B4DFF]" /> {shop.location}
           </span>
           <span className="flex items-center gap-2">
-            <Box size={14} className="text-[#5B4DFF]" /> Open • Closes{" "}
-            {shop.closes}
+            <Clock size={14} className="text-[#5B4DFF]" /> Open • Closes {shop.closes}
           </span>
           <span className="flex items-center gap-2">
-            <Tag size={14} className="text-[#5B4DFF]" /> Shop ID:{" "}
-            {shop.shopIdDisplay}
+            <Tag size={14} className="text-[#5B4DFF]" /> Shop ID: {shop.shopIdDisplay}
           </span>
+          {shop.business_phone && (
+            <span className="flex items-center gap-2">
+              <Phone size={14} className="text-[#5B4DFF]" /> {shop.business_phone}
+            </span>
+          )}
         </div>
       </div>
 
@@ -369,7 +556,7 @@ export default function ShopDetailsPage() {
                 </div>
               </div>
               <Link
-                to={`/auction/${1}`}
+                to={`/auction/${auction.id}`}
                 className="mt-2 w-full block text-center rounded-lg py-2 text-xs font-semibold text-white"
                 style={{ backgroundColor: THEME.ink }}
               >
@@ -615,49 +802,65 @@ export default function ShopDetailsPage() {
                 </span>
               </div>
             </div>
-
-            {/* <button
-              onClick={() => setIsFollowing(!isFollowing)}
-              className={`px-5 py-2 rounded-lg border text-sm font-medium transition-colors ${isFollowing ? "border-slate-300 text-slate-600 bg-slate-50" : "border-[#5B4DFF] text-[#5B4DFF] bg-white"}`}
-            >
-              {isFollowing ? "Following" : "Follow"}
-            </button> */}
           </div>
 
-          {/* Community Card */}
-          <div className="mt-3 bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-[#FDF3E1] rounded-full">
-                <Users size={20} className="text-[#D9A441]" />
+          {/* ✅ COMMUNITY CARD - With Follow/Unfollow Integration */}
+          {hasCommunity && (
+            <div className="mt-3 bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#FDF3E1] rounded-full">
+                  <Users size={20} className="text-[#D9A441]" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#0F1638]">
+                    {communityName}
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    {isCommunityJoined
+                      ? communityRole === "owner"
+                        ? "You are the Owner of this community"
+                        : "You are a member of this community"
+                      : "Join to connect with other customers"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-bold text-[#0F1638]">WoodNest Furniture Community</p>
-                <p className="text-[11px] text-slate-500">
-                  {isCommunityJoined 
-                    ? "You are a member of WoodNest Furniture" 
-                    : "Connect with other customers"}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setIsCommunityJoined(!isCommunityJoined)}
-              className={`px-5 py-2 rounded-lg border text-xs font-semibold transition-all ${
-                isCommunityJoined
-                  ? "border-green-500 text-green-600 bg-green-50"
-                  : "border-[#5B4DFF] text-[#5B4DFF] bg-white"
-              }`}
-            >
-              {isCommunityJoined ? (
-                <span className="flex items-center gap-1">
-                  <Check size={14} /> Joined
+
+              {communityRole === "owner" ? (
+                <span className="px-5 py-2 rounded-lg border border-[#D9A441] text-[#D9A441] bg-[#FDF3E1] text-xs font-semibold flex items-center gap-1">
+                  <BadgeCheck size={14} /> Owner
                 </span>
               ) : (
-                <span className="flex items-center gap-1">
-                  <UserPlus size={14} /> Join
-                </span>
+                <button
+                  onClick={handleCommunityAction}
+                  disabled={isJoiningCommunity}
+                  className={`px-5 py-2 rounded-lg border text-xs font-semibold flex items-center gap-1 transition-all ${
+                    isCommunityJoined
+                      ? "border-red-500 text-red-600 bg-red-50 hover:bg-red-100"
+                      : "border-[#5B4DFF] text-[#5B4DFF] bg-white hover:bg-blue-50"
+                  } ${isJoiningCommunity ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {isJoiningCommunity ? (
+                    <>
+                      <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1"></span>
+                      {isCommunityJoined ? "Leaving..." : "Joining..."}
+                    </>
+                  ) : (
+                    <>
+                      {isCommunityJoined ? (
+                        <>
+                          <span>✕</span> Leave
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus size={14} /> Join
+                        </>
+                      )}
+                    </>
+                  )}
+                </button>
               )}
-            </button>
-          </div>
+            </div>
+          )}
 
           {/* Stats Row */}
           <div className="grid grid-cols-4 gap-2 mt-4 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
@@ -701,15 +904,19 @@ export default function ShopDetailsPage() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${activeTab === tab ? "border-[#5B4DFF] text-[#5B4DFF]" : "border-transparent text-slate-500"}`}
+                className={`py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
+                  activeTab === tab
+                    ? "border-[#5B4DFF] text-[#5B4DFF]"
+                    : "border-transparent text-slate-500"
+                }`}
               >
                 {tab === "portfolio"
                   ? "Portfolio"
                   : tab === "livebids"
-                    ? `Live Bids (${shop.liveBids})`
-                    : tab === "about"
-                      ? "About Shop"
-                      : `Reviews (${shop.reviewsCount})`}
+                  ? `Live Bids (${shop.liveBids})`
+                  : tab === "about"
+                  ? "About Shop"
+                  : `Reviews (${shop.reviewsCount})`}
               </button>
             ))}
           </div>
@@ -726,12 +933,26 @@ export default function ShopDetailsPage() {
         {/* Bottom Fixed Buttons */}
         <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t border-slate-200 shadow-lg">
           <div className="flex gap-2">
-            <button className="flex-1 p-2 rounded-xl border-2 border-[rgb(91,77,255)] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white">
+            <button
+              className="flex-1 p-2 rounded-xl border-2 border-[rgb(91,77,255)] text-[#5B4DFF] font-semibold flex items-center justify-center gap-2 bg-white"
+              onClick={() => {
+                if (shop.business_phone) {
+                  window.location.href = `tel:${shop.business_phone}`;
+                }
+              }}
+            >
               <Phone size={18} /> Call Shop
             </button>
             <button
               className="flex-[1.5] p-2 rounded-xl text-white font-semibold flex items-center justify-center gap-2 shadow-md"
               style={{ backgroundColor: "#5B4DFF" }}
+              onClick={() => {
+                if (shop.fullAddress) {
+                  window.open(
+                    `https://maps.google.com/?q=${encodeURIComponent(shop.fullAddress)}`
+                  );
+                }
+              }}
             >
               <Store size={18} /> Visit Shop
             </button>

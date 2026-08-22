@@ -22,7 +22,11 @@ import {
   UserMinus,
   CheckCircle,
   Clock,
-  Search
+  Search,
+  Image as ImageIcon,
+  Video,
+  Play,
+  File
 } from "lucide-react";
 import { getToken, isLoggedIn } from "./userSession";
 
@@ -33,7 +37,8 @@ const THEME = {
   mapBg: "#E7ECFA",
 };
 
-const API_URL = "http://localhost:5000/api/communities";
+const API_URL = "http://test.aakarcanvassing.com/api/communities";
+const BASE_URL = "http://test.aakarcanvassing.com";
 
 export default function CommunityChatPage() {
   const navigate = useNavigate();
@@ -50,8 +55,8 @@ export default function CommunityChatPage() {
   const [postType, setPostType] = useState("general");
   const [isPinned, setIsPinned] = useState(false);
   const [isAnnouncement, setIsAnnouncement] = useState(false);
-  const [mediaUrls, setMediaUrls] = useState([]);
-  const [mediaInput, setMediaInput] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [filePreviews, setFilePreviews] = useState([]);
   const [memberCount, setMemberCount] = useState(0);
   const [isOwner, setIsOwner] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
@@ -62,6 +67,7 @@ export default function CommunityChatPage() {
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [searchMember, setSearchMember] = useState("");
   const [filteredMembers, setFilteredMembers] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
   
   // Comment states
   const [showCommentModal, setShowCommentModal] = useState(false);
@@ -71,6 +77,8 @@ export default function CommunityChatPage() {
   const [loadingComments, setLoadingComments] = useState(false);
   const [showComments, setShowComments] = useState({});
   
+  // File input ref
+  const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   // Get current user ID from localStorage
@@ -110,10 +118,43 @@ export default function CommunityChatPage() {
     }
   }, [searchMember, members]);
 
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  // Handle file selection
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = files.filter(file => {
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
+      return validTypes.includes(file.type) && file.size <= 50 * 1024 * 1024;
+    });
+
+    if (validFiles.length !== files.length) {
+      alert('Some files were skipped. Only images and videos up to 50MB are allowed.');
     }
+
+    setSelectedFiles([...selectedFiles, ...validFiles]);
+    
+    const newPreviews = validFiles.map(file => ({
+      file: file,
+      preview: URL.createObjectURL(file),
+      type: file.type.startsWith('video/') ? 'video' : 'image'
+    }));
+    
+    setFilePreviews([...filePreviews, ...newPreviews]);
+  };
+
+  // Remove selected file
+  const removeFile = (index) => {
+    const newFiles = [...selectedFiles];
+    const newPreviews = [...filePreviews];
+    
+    if (newPreviews[index]?.preview) {
+      URL.revokeObjectURL(newPreviews[index].preview);
+    }
+    
+    newFiles.splice(index, 1);
+    newPreviews.splice(index, 1);
+    
+    setSelectedFiles(newFiles);
+    setFilePreviews(newPreviews);
   };
 
   // Fetch Community Details
@@ -154,7 +195,7 @@ export default function CommunityChatPage() {
     }
   };
 
-  // Fetch Community Members - API Call
+  // Fetch Community Members
   const fetchCommunityMembers = async (page = 1, limit = 20) => {
     try {
       setLoadingMembers(true);
@@ -164,8 +205,6 @@ export default function CommunityChatPage() {
         return;
       }
 
-      console.log("Fetching members for community:", communityId);
-      
       const response = await fetch(`${API_URL}/${communityId}/members?page=${page}&limit=${limit}`, {
         method: "GET",
         headers: {
@@ -175,7 +214,6 @@ export default function CommunityChatPage() {
       });
 
       const data = await response.json();
-      console.log("Members API Response:", data);
 
       if (data.success) {
         let membersData = [];
@@ -187,24 +225,13 @@ export default function CommunityChatPage() {
           } else if (data.data.members && Array.isArray(data.data.members)) {
             membersData = data.data.members;
             paginationData = data.data.pagination || data.pagination || paginationData;
-          } else if (data.data.results && Array.isArray(data.data.results)) {
-            membersData = data.data.results;
-            paginationData = data.data.pagination || data.pagination || paginationData;
           }
         }
         
         setMembers(membersData);
         setFilteredMembers(membersData);
-        
-        if (data.pagination) {
-          setMembersPagination(data.pagination);
-        } else if (paginationData) {
-          setMembersPagination(paginationData);
-        }
-        
+        setMembersPagination(paginationData);
         setMemberCount(membersData.length);
-      } else {
-        console.error("Failed to fetch members:", data.message);
       }
     } catch (err) {
       console.error("Error fetching members:", err);
@@ -213,7 +240,7 @@ export default function CommunityChatPage() {
     }
   };
 
-  // Remove Member from Community - API Call
+  // Remove Member
   const handleRemoveMember = async (memberId, memberName) => {
     if (!window.confirm(`Are you sure you want to remove "${memberName}" from this community?`)) {
       return;
@@ -227,8 +254,6 @@ export default function CommunityChatPage() {
         return;
       }
 
-      console.log(`Removing member ${memberId} from community ${communityId}`);
-      
       const response = await fetch(`${API_URL}/${communityId}/members/${memberId}`, {
         method: "DELETE",
         headers: {
@@ -238,7 +263,6 @@ export default function CommunityChatPage() {
       });
 
       const data = await response.json();
-      console.log("Remove member response:", data);
 
       if (data.success) {
         alert(`✅ "${memberName}" removed successfully!`);
@@ -297,13 +321,7 @@ export default function CommunityChatPage() {
         }));
         
         setPosts(processedPosts);
-        
-        if (data.pagination) {
-          setPagination(data.pagination);
-        } else if (paginationData) {
-          setPagination(paginationData);
-        }
-        
+        setPagination(paginationData);
         setCurrentPage(page);
       } else {
         setError(data.message || "Failed to load posts");
@@ -447,17 +465,18 @@ export default function CommunityChatPage() {
     }
   };
 
-  // Create New Post
+  // Create New Post with File Upload
   const handleCreatePost = async (e) => {
     e.preventDefault();
     
-    if (!newPost.trim()) {
-      alert("Please write something to post");
+    if (!newPost.trim() && selectedFiles.length === 0) {
+      alert("Please write something or add media to post");
       return;
     }
 
     setSubmitting(true);
     setError("");
+    setUploadProgress(0);
 
     try {
       const token = getToken();
@@ -466,21 +485,25 @@ export default function CommunityChatPage() {
         return;
       }
 
-      const payload = {
-        content: newPost,
-        post_type: postType,
-        is_pinned: isPinned,
-        is_announcement: isAnnouncement,
-        media_urls: mediaUrls.filter(url => url.trim() !== "")
-      };
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('content', newPost || '');
+      formData.append('post_type', postType);
+      formData.append('is_pinned', isPinned ? 'true' : 'false');
+      formData.append('is_announcement', isAnnouncement ? 'true' : 'false');
 
+      // Append files
+      selectedFiles.forEach((file) => {
+        formData.append('media', file);
+      });
+
+      // Send as FormData with file upload
       const response = await fetch(`${API_URL}/${communityId}/posts`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       const data = await response.json();
@@ -488,11 +511,13 @@ export default function CommunityChatPage() {
       if (data.success) {
         alert("Post created successfully!");
         setNewPost("");
-        setMediaUrls([]);
+        setSelectedFiles([]);
+        setFilePreviews([]);
         setShowPostModal(false);
         setPostType("general");
         setIsPinned(false);
         setIsAnnouncement(false);
+        setUploadProgress(0);
         await fetchCommunityPosts(1);
       } else {
         setError(data.message || "Failed to create post");
@@ -505,19 +530,6 @@ export default function CommunityChatPage() {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // Add media URL
-  const addMediaUrl = () => {
-    if (mediaInput.trim()) {
-      setMediaUrls([...mediaUrls, mediaInput.trim()]);
-      setMediaInput("");
-    }
-  };
-
-  // Remove media URL
-  const removeMediaUrl = (index) => {
-    setMediaUrls(mediaUrls.filter((_, i) => i !== index));
   };
 
   // Format date
@@ -569,6 +581,64 @@ export default function CommunityChatPage() {
       default:
         return null;
     }
+  };
+
+  // Render Media (Images and Videos)
+  const renderMedia = (mediaItems) => {
+    if (!mediaItems || !Array.isArray(mediaItems) || mediaItems.length === 0) return null;
+
+    const displayCount = Math.min(mediaItems.length, 4);
+    const remaining = mediaItems.length - 4;
+
+    return (
+      <div className={`grid gap-2 mt-2 ${mediaItems.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        {mediaItems.slice(0, displayCount).map((item, idx) => {
+          // Handle both string URLs and object media
+          const url = typeof item === 'string' ? item : item.url;
+          const type = typeof item === 'string' 
+            ? (url?.match(/\.(mp4|webm|ogg|mov|avi)$/i) ? 'video' : 'image')
+            : (item.type || 'image');
+          
+          return (
+            <div 
+              key={idx} 
+              className="rounded-lg overflow-hidden bg-slate-100 relative" 
+              style={{ height: mediaItems.length === 1 ? '200px' : '150px' }}
+            >
+              {type === 'video' ? (
+                <div className="relative w-full h-full">
+                  <video 
+                    src={url} 
+                    className="w-full h-full object-cover"
+                    controls
+                    poster={url + '?poster=1'}
+                  >
+                    <source src={url} />
+                  </video>
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none">
+                    <Play size={32} className="text-white/70" />
+                  </div>
+                </div>
+              ) : (
+                <img 
+                  src={url} 
+                  alt="Media" 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }} 
+                />
+              )}
+            </div>
+          );
+        })}
+        {remaining > 0 && (
+          <div className="rounded-lg bg-slate-100 h-[150px] flex items-center justify-center text-xs text-slate-500">
+            +{remaining} more
+          </div>
+        )}
+      </div>
+    );
   };
 
   // Handle page change
@@ -770,7 +840,7 @@ export default function CommunityChatPage() {
             </div>
           )}
 
-          {/* Posts - Only Comments, No Like/Share */}
+          {/* Posts */}
           <div className="space-y-3">
             {!posts || posts.length === 0 ? (
               <div className="bg-white rounded-xl p-8 text-center border border-slate-100">
@@ -822,29 +892,10 @@ export default function CommunityChatPage() {
                     </div>
                     <p className="text-sm text-slate-700 mt-2">{post.content}</p>
                     
-                    {post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0 && (
-                      <div className="mt-2 grid grid-cols-2 gap-2">
-                        {post.media_urls.slice(0, 4).map((url, idx) => (
-                          <div key={idx} className="rounded-lg overflow-hidden bg-slate-100 h-20">
-                            <img 
-                              src={url} 
-                              alt="Media" 
-                              className="w-full h-full object-cover" 
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                              }} 
-                            />
-                          </div>
-                        ))}
-                        {post.media_urls.length > 4 && (
-                          <div className="rounded-lg bg-slate-100 h-20 flex items-center justify-center text-xs text-slate-500">
-                            +{post.media_urls.length - 4} more
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    {/* Render Media */}
+                    {renderMedia(post.media_urls)}
                     
-                    {/* Only Comments Button - No Like, No Share */}
+                    {/* Comments Button */}
                     <div className="flex items-center gap-4 mt-3 pt-2 border-t border-slate-100">
                       <button 
                         onClick={() => openCommentModal(post.id)}
@@ -894,7 +945,7 @@ export default function CommunityChatPage() {
           </button>
         )}
 
-        {/* Create Post Modal */}
+        {/* Create Post Modal with File Upload */}
         {showPostModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
             <div className="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl relative p-6 max-h-[90vh] overflow-y-auto">
@@ -930,11 +981,10 @@ export default function CommunityChatPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-600">Content *</label>
+                  <label className="text-[11px] font-semibold text-slate-600">Content</label>
                   <textarea
                     placeholder="What's on your mind?"
                     rows={4}
-                    required
                     value={newPost}
                     onChange={(e) => setNewPost(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50 resize-none"
@@ -962,36 +1012,59 @@ export default function CommunityChatPage() {
                   </label>
                 </div>
 
+                {/* File Upload Section */}
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-600">Media URLs</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="url"
-                      placeholder="https://example.com/image.jpg"
-                      value={mediaInput}
-                      onChange={(e) => setMediaInput(e.target.value)}
-                      className="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:border-[#D9A441] transition-colors bg-slate-50"
-                    />
+                  <label className="text-[11px] font-semibold text-slate-600">Media (Images & Videos)</label>
+                  <div className="mt-1">
                     <button
                       type="button"
-                      onClick={addMediaUrl}
-                      className="px-4 py-2 bg-[#0F1638] text-white text-sm rounded-xl"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full py-3 border-2 border-dashed border-slate-300 rounded-xl text-sm text-slate-500 hover:border-[#D9A441] hover:text-[#D9A441] transition-colors flex items-center justify-center gap-2"
                     >
-                      Add
+                      <ImageIcon size={18} />
+                      <Video size={18} />
+                      <span>Click to upload images or videos</span>
                     </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,video/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleFileSelect}
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">Max 10 files, up to 50MB each</p>
                   </div>
-                  {mediaUrls.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {mediaUrls.map((url, index) => (
-                        <div key={index} className="flex items-center gap-1 bg-slate-100 rounded-lg px-2 py-1">
-                          <span className="text-[10px] text-slate-600 truncate max-w-[150px]">{url}</span>
+
+                  {/* File Previews */}
+                  {filePreviews.length > 0 && (
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      {filePreviews.map((file, index) => (
+                        <div key={index} className="relative rounded-lg overflow-hidden bg-slate-100 h-20">
+                          {file.type === 'video' ? (
+                            <div className="w-full h-full bg-slate-800 flex items-center justify-center">
+                              <Video size={24} className="text-white/50" />
+                              <Play size={16} className="text-white/70 absolute" />
+                            </div>
+                          ) : (
+                            <img 
+                              src={file.preview} 
+                              alt="Preview" 
+                              className="w-full h-full object-cover"
+                            />
+                          )}
                           <button
                             type="button"
-                            onClick={() => removeMediaUrl(index)}
-                            className="text-red-500 hover:text-red-700"
+                            onClick={() => removeFile(index)}
+                            className="absolute top-1 right-1 p-1 bg-black/60 rounded-full hover:bg-black/80 transition-colors"
                           >
-                            <X size={12} />
+                            <X size={12} className="text-white" />
                           </button>
+                          {file.type === 'video' && (
+                            <div className="absolute bottom-1 left-1 bg-black/60 px-1.5 py-0.5 rounded text-[8px] text-white">
+                              Video
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

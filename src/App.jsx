@@ -28,6 +28,7 @@ import QRScannerPage from "./component/QRScannerPage";
 import SellPage from "./component/SellPage";
 import SettingsPage from "./component/SettingsPage";
 import ShopDetailsPage from "./component/ShopDetailsPage";
+import BusinessProfilePage from "./component/BusinessProfilePage";
 
 function LayoutWithBottomNav() {
   const location = useLocation();
@@ -72,6 +73,7 @@ function LayoutWithBottomNav() {
         <Route path="/my-stock" element={<MyStockPage />} />
         <Route path="/bidding-dashboard" element={<BiddingDashboardPage />} />
         <Route path="/bidding-details/:auctionId" element={<BiddingDetailsPage />} />
+        <Route path="/business-profile/:shopId" element={<BusinessProfilePage />} />
       </Routes>
       
       {/* BottomNav - Show on all pages EXCEPT "/" and "/my-community" */}
