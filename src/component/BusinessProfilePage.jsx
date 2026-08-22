@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getToken, isLoggedIn } from "./userSession";
 
-const API_URL = "http://test.aakarcanvassing.com/api";
+const API_URL = "https://test.aakarcanvassing.com/api";
 
 export default function BusinessProfilePage() {
   const navigate = useNavigate();
@@ -254,7 +254,7 @@ export default function BusinessProfilePage() {
       console.log("Form data being sent:", Object.fromEntries(formDataToSend));
 
       const response = await fetch(
-        `http://test.aakarcanvassing.com/api/business/business-details/${targetId}`,
+        `https://test.aakarcanvassing.com/api/business/business-details/${targetId}`,
         {
           method: "PUT",
           headers: {

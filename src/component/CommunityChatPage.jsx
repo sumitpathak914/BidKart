@@ -37,8 +37,8 @@ const THEME = {
   mapBg: "#E7ECFA",
 };
 
-const API_URL = "http://test.aakarcanvassing.com/api/communities";
-const BASE_URL = "http://test.aakarcanvassing.com";
+const API_URL = "https://test.aakarcanvassing.com/api/communities";
+const BASE_URL = "https://test.aakarcanvassing.com";
 
 export default function CommunityChatPage() {
   const navigate = useNavigate();

@@ -19,7 +19,7 @@ const THEME = {
   mapBg: "#E7ECFA",
 };
 
-const API_URL = "http://test.aakarcanvassing.com/api/auth";
+const API_URL = "https://test.aakarcanvassing.com/api/auth";
 
 export default function LoginPage() {
   const navigate = useNavigate();

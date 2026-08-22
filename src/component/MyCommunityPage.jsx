@@ -30,7 +30,7 @@ const THEME = {
   mapBg: "#E7ECFA",
 };
 
-const API_URL = "http://test.aakarcanvassing.com/api/communities";
+const API_URL = "https://test.aakarcanvassing.com/api/communities";
 
 export default function MyCommunityPage() {
   const navigate = useNavigate();

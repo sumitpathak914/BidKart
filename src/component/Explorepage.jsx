@@ -27,7 +27,7 @@ const THEME = {
 };
 
 // API Base URL
-const API_BASE_URL = "http://test.aakarcanvassing.com";
+const API_BASE_URL = "https://test.aakarcanvassing.com";
 
 // --- SKELETON LOADER COMPONENTS ---
 const Shimmer = () => (

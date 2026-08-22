@@ -32,7 +32,7 @@ const THEME = {
   primary: "#5B4DFF",
 };
 
-const API_BASE_URL = "http://test.aakarcanvassing.com";
+const API_BASE_URL = "https://test.aakarcanvassing.com";
 
 // --- SKELETON LOADER COMPONENTS ---
 const Shimmer = () => (
@@ -174,7 +174,7 @@ export default function ShopDetailsPage() {
     }
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/auth/profile`, {
+      const response = await axios.get(`${API_BASE_URL}/api/auth/ShopDetails`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
