@@ -38,8 +38,10 @@ export default function KycPage() {
     aadhaar: "",
     pan: "",
     accountNumber: "",
-    passbookImage: ""
+    passbookImage: null // Store File object instead of base64
   });
+  
+  const [previewUrl, setPreviewUrl] = useState("");
 
   // Get shopId from URL
   useEffect(() => {
@@ -82,7 +84,7 @@ export default function KycPage() {
 
       if (data.success) {
         setKycData(data.data);
-        const status = data.data.status || "pending";
+        const status = data.data?.status || "pending";
         setKycStatus(status);
         
         if (status === "verified" || status === "approved") {
@@ -92,13 +94,17 @@ export default function KycPage() {
         }
 
         // If already submitted, populate form with existing data
-        if (data.data.aadhaar_number) {
+        if (data.data?.aadhaar_number) {
           setKycForm({
             aadhaar: data.data.aadhaar_number || "",
             pan: data.data.pan_number || "",
             accountNumber: data.data.account_number || "",
-            passbookImage: data.data.passbook_image || ""
+            passbookImage: null
           });
+          // Set preview URL for existing image
+          if (data.data.passbook_image) {
+            setPreviewUrl(data.data.passbook_image);
+          }
         }
       } else {
         setError(data.message || "Failed to fetch KYC status");
@@ -114,9 +120,12 @@ export default function KycPage() {
   const handleKycImageSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Store the file object
+      setKycForm({ ...kycForm, passbookImage: file });
+      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
-        setKycForm({ ...kycForm, passbookImage: reader.result });
+        setPreviewUrl(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -141,21 +150,21 @@ export default function KycPage() {
         return;
       }
 
-      const payload = {
-        aadhaar: kycForm.aadhaar,
-        pan: kycForm.pan,
-        accountNumber: kycForm.accountNumber,
-        passbookImage: kycForm.passbookImage,
-        kycStatus: "pending"
-      };
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('aadhaar', kycForm.aadhaar);
+      formData.append('pan', kycForm.pan);
+      formData.append('accountNumber', kycForm.accountNumber);
+      formData.append('passbookImage', kycForm.passbookImage);
+      formData.append('kycStatus', 'pending');
 
       const response = await fetch(`${API_URL}/kyc`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
+          // Don't set Content-Type header - browser will set it with boundary for FormData
         },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       const data = await response.json();
@@ -278,6 +287,11 @@ export default function KycPage() {
                 <div className="mt-4 text-left bg-slate-50 rounded-xl p-3 text-xs">
                   <p><strong>Submitted:</strong> {new Date(kycData.submitted_at).toLocaleDateString()}</p>
                   <p><strong>Updated:</strong> {new Date(kycData.updated_at).toLocaleDateString()}</p>
+                  {/* {kycData.passbook_image && (
+                    <div className="mt-2">
+                      <img src={kycData.passbook_image} alt="Passbook" className="w-full max-h-32 object-contain rounded-lg" />
+                    </div>
+                  )} */}
                 </div>
               )}
             </div>
@@ -292,6 +306,11 @@ export default function KycPage() {
               <div className="mt-4 text-left bg-slate-50 rounded-xl p-3 text-xs">
                 <p><strong>Submitted:</strong> {new Date(kycData.submitted_at).toLocaleDateString()}</p>
                 <p><strong>Status:</strong> {kycStatus.charAt(0).toUpperCase() + kycStatus.slice(1)}</p>
+                {/* {kycData.passbook_image && (
+                  <div className="mt-2">
+                    <img src={kycData.passbook_image} alt="Passbook" className="w-full max-h-32 object-contain rounded-lg" />
+                  </div>
+                )} */}
               </div>
             </div>
           ) : kycStatus === "rejected" ? (
@@ -358,12 +377,17 @@ export default function KycPage() {
                       />
                     </div>
                   </label>
-                  {kycForm.passbookImage && (
+                  {previewUrl && (
                     <div className="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200">
-                      <img src={kycForm.passbookImage} alt="Passbook" className="w-full h-full object-cover" />
+                      <img src={previewUrl} alt="Passbook" className="w-full h-full object-cover" />
                     </div>
                   )}
                 </div>
+                {kycForm.passbookImage && (
+                  <p className="text-xs text-slate-500 mt-1">
+                    Selected: {kycForm.passbookImage.name}
+                  </p>
+                )}
               </div>
 
               <button
@@ -396,8 +420,9 @@ export default function KycPage() {
                   aadhaar: "",
                   pan: "",
                   accountNumber: "",
-                  passbookImage: ""
+                  passbookImage: null
                 });
+                setPreviewUrl("");
               }}
               className="w-full py-3 rounded-xl border-2 border-[#D9A441] text-[#D9A441] font-semibold hover:bg-[#FDF3E1] transition-colors"
             >

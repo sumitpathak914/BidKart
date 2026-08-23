@@ -1,7 +1,7 @@
+// ExplorePage.jsx
 import axios from "axios";
 import {
   CheckCircle2,
-  ChevronDown,
   Heart,
   LocateFixed,
   MapPin,
@@ -14,6 +14,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 // Import userSession functions
 import { getToken, getUser, isLoggedIn, logoutUser } from "./userSession";
+// Import LocationHeader component
+import LocationHeader from "./LocationHeader";
+// Import location store
+import { getLocation, setLocation, updateLocationFromCoords } from "./locationStore";
 
 const THEME = {
   ink: "#0F1638",
@@ -164,7 +168,7 @@ export default function ExplorePage() {
   // Fetch active categories from API
   const fetchActiveCategories = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/categories/active`);
+      const response = await axios.get(`http://test.aakarcanvassing.com/api/categories/active`);
       
       if (response.data.success && response.data.data) {
         // Add "All" category at the beginning
@@ -268,20 +272,27 @@ export default function ExplorePage() {
     setError(null);
 
     try {
-      // Get current location
+      // First check if location exists in store
+      const storedLocation = getLocation();
+      
+      if (storedLocation.city && storedLocation.state) {
+        console.log("Using stored location in ExplorePage:", storedLocation);
+        setUserCity(storedLocation.city);
+        setUserState(storedLocation.state);
+        await fetchNearbyShops(categoryId);
+        setIsGettingLocation(false);
+        return;
+      }
+
+      // Get current location if not in store
       const location = await getCurrentLocation();
       console.log("Current location:", location);
 
-      // Get city and state from coordinates
-      const locationDetails = await getLocationDetails(location.lat, location.lng);
-      console.log("Location details:", locationDetails);
-
-      const city = locationDetails.city || "";
-      const state = locationDetails.state || "";
-
-      // Update user city and state
-      setUserCity(city);
-      setUserState(state);
+      // Update location in store
+      const updatedLocation = await updateLocationFromCoords(location.lat, location.lng);
+      
+      setUserCity(updatedLocation.city);
+      setUserState(updatedLocation.state);
 
       // Now fetch shops with the location
       await fetchNearbyShops(categoryId);
@@ -289,7 +300,6 @@ export default function ExplorePage() {
     } catch (err) {
       console.error("Error getting location:", err);
       
-      // Handle different geolocation errors
       let errorMessage = "Unable to get your location. ";
       if (err.code === 1) {
         errorMessage += "Please allow location access in your browser settings.";
@@ -306,6 +316,18 @@ export default function ExplorePage() {
       setIsLoading(false);
     } finally {
       setIsGettingLocation(false);
+    }
+  };
+
+  // Handle location update from LocationHeader
+  const handleLocationUpdate = async (city, state) => {
+    if (city && state) {
+      setUserCity(city);
+      setUserState(state);
+      await fetchNearbyShops(activeFilter);
+    } else {
+      // If no city/state provided, use the default location detection
+      await getUserLocationAndFetchShops(activeFilter);
     }
   };
 
@@ -388,47 +410,31 @@ export default function ExplorePage() {
     );
   }
 
-  // Get user profile image from session or use default
-  const userProfileImage =
-    user?.profileImage ||
-    "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&q=80";
-
   return (
     <div className="min-h-screen bg-[rgb(246,245,241)] pb-24">
       <div className="mx-auto max-w-md">
         
-        {/* Header */}
-        <header className="px-5 pt-6">
-          <div className="flex items-start justify-between">
-            <button className="flex items-center gap-1">
-              <MapPin size={16} style={{ color: THEME.gold }} />
-              <span className="text-[15px] font-bold text-[#0F1638]">
-                {userCity || "Detecting location..."}
-                {userState ? `, ${userState}` : ""}
-              </span>
-              <ChevronDown size={15} className="text-slate-400" />
-            </button>
-            <div className="flex items-center gap-3">
-              <img
-                src={userProfileImage}
-                alt="Profile"
-                className="h-10 w-10 rounded-full object-cover ring-2 ring-white"
-              />
-            </div>
-          </div>
+        {/* Location Header - Replacing the old header */}
+        <LocationHeader
+          userCity={userCity}
+          setUserCity={setUserCity}
+          userState={userState}
+          setUserState={setUserState}
+          onLocationUpdate={handleLocationUpdate}
+          rightComponent={null}
+        />
 
-          {/* Search */}
-          <div className="mt-4 flex items-center gap-3">
-            <div className="flex flex-1 items-center gap-2 rounded-2xl bg-white px-4 py-3.5 shadow-sm shadow-slate-200/70">
-              <Search size={18} className="text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search for shops, products & auctions..."
-                className="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              />
-            </div>
+        {/* Search */}
+        <div className="px-5 mt-4">
+          <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3.5 shadow-sm shadow-slate-200/70">
+            <Search size={18} className="text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search for shops, products & auctions..."
+              className="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+            />
           </div>
-        </header>
+        </div>
 
         {/* Error Message */}
         {error && (
@@ -453,7 +459,7 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Category filter pills - with "All" as first category */}
+        {/* Category filter pills */}
         <div className="mt-4 flex gap-2 overflow-x-auto px-5 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categories.map((category) => {
             const isActive = activeFilter === category.id.toString();
@@ -478,7 +484,6 @@ export default function ExplorePage() {
           className="relative mx-5 mt-4 h-[300px] overflow-hidden rounded-3xl"
           style={{ backgroundColor: THEME.mapBg }}
         >
-          {/* subtle road grid */}
           <svg
             className="absolute inset-0 h-full w-full opacity-40"
             preserveAspectRatio="none"
@@ -513,7 +518,6 @@ export default function ExplorePage() {
             <MapPinMarker key={pin.id} pin={pin} />
           ))}
 
-          {/* You are here */}
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
             <span
               className="absolute h-14 w-14 animate-ping rounded-full opacity-30"
@@ -528,7 +532,6 @@ export default function ExplorePage() {
             </span>
           </div>
 
-          {/* Floating controls */}
           <div className="absolute bottom-4 right-4 flex flex-col gap-2">
             <button
               onClick={() => getUserLocationAndFetchShops(activeFilter)}
@@ -566,7 +569,6 @@ export default function ExplorePage() {
                   className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                 >
                   <div className="flex p-4 gap-4">
-                    {/* Image Section */}
                     <div className="relative flex-shrink-0">
                       <div className="h-28 w-28 rounded-xl overflow-hidden bg-slate-100">
                         <img
@@ -582,12 +584,10 @@ export default function ExplorePage() {
                               "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80";
                           }}
                         />
-                        {/* Distance Badge */}
                         <span className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-[10px] font-bold text-[#0F1638] shadow-sm">
                           <MapPin size={10} className="inline mr-1" />
                           {shop.distance || `${(Math.random() * 2 + 0.5).toFixed(1)} km`}
                         </span>
-                        {/* Open/Closed Status Badge */}
                         <span
                           className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
                             shop.is_open !== false
@@ -600,9 +600,7 @@ export default function ExplorePage() {
                       </div>
                     </div>
 
-                    {/* Content Section */}
                     <div className="flex-1 min-w-0">
-                      {/* Header */}
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
@@ -632,7 +630,6 @@ export default function ExplorePage() {
                         </button>
                       </div>
 
-                      {/* Category & Rating */}
                       <div className="flex items-center gap-2 mt-2">
                         <span
                           className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
@@ -657,7 +654,6 @@ export default function ExplorePage() {
                         </div>
                       </div>
 
-                      {/* Timing & Action */}
                       <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
                         <div className="flex items-center gap-2 text-[10px] text-slate-400">
                           <span className="flex items-center gap-1">

@@ -28,7 +28,11 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import BannerImage from "../assets/banner.png"; // Importing the banner image
+import BannerImage from "../assets/banner.png";
+// Import LocationHeader component
+import LocationHeader from "./LocationHeader";
+// Import location store
+import { getLocation, setLocation, updateLocationFromCoords } from "./locationStore";
 
 const THEME = {
   ink: "#0F1638",
@@ -148,7 +152,6 @@ const SHOPS = [
   },
 ];
 
-// --- NEW DATA: BEST DEALS ---
 const BEST_DEALS = [
   {
     id: 1,
@@ -184,7 +187,6 @@ const BEST_DEALS = [
   },
 ];
 
-// --- NEW DATA: COUPONS ---
 const COUPONS = [
   {
     id: 1,
@@ -203,7 +205,6 @@ const COUPONS = [
   { id: 3, code: "DEAL50", desc: "Flat ₹50 off", icon: Tag, color: "#0F1638" },
 ];
 
-// --- NEW DATA: ENDING SOON BIDS ---
 const ENDING_SOON = [
   {
     id: 1,
@@ -256,26 +257,42 @@ export default function HomePage() {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
-  // --- STATE FOR THE MODAL ---
-   const [showPromoModal, setShowPromoModal] = useState(() => {
+  // --- STATE ---
+  const [showPromoModal, setShowPromoModal] = useState(() => {
     const isClosed = sessionStorage.getItem('promoClosed');
     return isClosed !== "true";
   });
+  
+  // Location states for LocationHeader
+  const [userCity, setUserCity] = useState("");
+  const [userState, setUserState] = useState("");
+  const [userName, setUserName] = useState("Sumit");
+  
   const [locationText, setLocationText] = useState("Getting location...");
   const [isLocationLoading, setIsLocationLoading] = useState(true);
   const [userCoords, setUserCoords] = useState(null);
-  const [isPageLoading, setIsPageLoading] = useState(true); // Overall skeleton state
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
+  // --- GET LOCATION FROM STORE OR FETCH ---
   useEffect(() => {
-    // Simulate page load
-    const timer = setTimeout(() => setIsPageLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    // First check if location exists in store
+    const storedLocation = getLocation();
+    
+    if (storedLocation.city && storedLocation.state) {
+      console.log("Using stored location in HomePage:", storedLocation);
+      setUserCity(storedLocation.city);
+      setUserState(storedLocation.state);
+      setLocationText(storedLocation.fullAddress || `${storedLocation.city}, ${storedLocation.state}`);
+      setIsLocationLoading(false);
+      setIsPageLoading(false);
+      return;
+    }
 
-  useEffect(() => {
+    // If no location in store, fetch new
     if (!navigator.geolocation) {
       setLocationText("Location not supported");
       setIsLocationLoading(false);
+      setIsPageLoading(false);
       return;
     }
 
@@ -285,48 +302,53 @@ export default function HomePage() {
         setUserCoords({ latitude, longitude });
 
         try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1&accept-language=en`,
-          );
-          const data = await response.json();
-
-          if (data && data.address) {
-            const addr = data.address;
-
-            const fullAddressParts = [
-              addr.road,
-              addr.neighbourhood,
-              addr.suburb,
-              addr.city_district,
-              addr.city,
-              addr.state,
-              addr.country,
-            ].filter(Boolean);
-
-            const fullAddress = fullAddressParts.join(", ");
-            setLocationText(fullAddress);
-          } else {
-            setLocationText("Nashik, Maharashtra, India");
-          }
+          const updatedLocation = await updateLocationFromCoords(latitude, longitude);
+          console.log("Location fetched in HomePage:", updatedLocation);
+          
+          setUserCity(updatedLocation.city);
+          setUserState(updatedLocation.state);
+          setLocationText(updatedLocation.fullAddress);
+          
         } catch (error) {
           console.error("Reverse Geocoding Error:", error);
-          setLocationText("Nashik, Maharashtra, India");
+          const defaultLocation = { city: "Nashik", state: "Maharashtra", fullAddress: "Nashik, Maharashtra, India" };
+          setUserCity(defaultLocation.city);
+          setUserState(defaultLocation.state);
+          setLocationText(defaultLocation.fullAddress);
+          setLocation(defaultLocation);
         } finally {
           setIsLocationLoading(false);
+          setIsPageLoading(false);
         }
       },
       (error) => {
         console.error("Geolocation Error:", error);
-        setLocationText("Nashik, Maharashtra, India");
+        const defaultLocation = { city: "Nashik", state: "Maharashtra", fullAddress: "Nashik, Maharashtra, India" };
+        setUserCity(defaultLocation.city);
+        setUserState(defaultLocation.state);
+        setLocationText(defaultLocation.fullAddress);
+        setLocation(defaultLocation);
         setIsLocationLoading(false);
+        setIsPageLoading(false);
       },
       { enableHighAccuracy: true },
     );
   }, []);
 
+  // --- HANDLE LOCATION UPDATE FROM HEADER ---
+  const handleLocationUpdate = async (city, state) => {
+    if (city && state) {
+      setUserCity(city);
+      setUserState(state);
+      setLocationText(`${city}, ${state}`);
+      // Update store
+      setLocation({ city, state, fullAddress: `${city}, ${state}` });
+    }
+  };
+
   // --- FUNCTION TO HANDLE CLOSING THE MODAL ---
   const handleClosePromoModal = () => {
-    sessionStorage.setItem('promoClosed', 'true'); // Save to session
+    sessionStorage.setItem('promoClosed', 'true');
     setShowPromoModal(false);
   };
 
@@ -374,67 +396,42 @@ export default function HomePage() {
       )} */}
 
       <div className="mx-auto max-w-md">
-        {/* --- PREMIUM HEADER --- */}
-        <header className="px-5 pt-6 pb-2 bg-[#F8F7F4]">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                {isLocationLoading ? (
-                  <SkeletonBox className="w-6 h-6 rounded-full" />
-                ) : (
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full" style={{ backgroundColor: THEME.gold }}>
-                    <MapPin size={12} className="text-white" />
-                  </span>
-                )}
-                <span className="text-xs font-semibold text-slate-500">
-                  Current Location
-                </span>
-              </div>
+        {/* --- LOCATION HEADER COMPONENT --- */}
+        <LocationHeader
+          userCity={userCity}
+          setUserCity={setUserCity}
+          userState={userState}
+          setUserState={setUserState}
+          onLocationUpdate={handleLocationUpdate}
+          rightComponent={
+            <button 
+              onClick={() => navigate("/notifications")}
+              className="relative p-1.5 rounded-full hover:bg-slate-100 transition-colors"
+            >
+              <Bell size={20} className="text-[#0F1638]" />
+              <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
+            </button>
+          }
+        />
 
-              <button className="mt-0.5 flex items-start gap-1 max-w-[250px] text-left" style={{ color: THEME.ink }}>
-                {isLocationLoading ? (
-                  <SkeletonText className="w-40 h-5" />
-                ) : (
-                  <>
-                    <span className="text-base font-bold leading-tight whitespace-normal break-words">
-                      {locationText}
-                    </span>
-                    <ChevronDown size={16} className="text-slate-400 flex-shrink-0 mt-1" />
-                  </>
-                )}
-              </button>
-            </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
-              {isLocationLoading ? (
-                <>
-                  <SkeletonBox className="w-11 h-11 rounded-full" />
-                  <SkeletonBox className="w-11 h-11 rounded-full" />
-                </>
-              ) : (
-                <>
-              
-                  <img src="https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=100&q=80" alt="Profile" className="h-11 w-11 rounded-full object-cover border-2 border-white shadow-md shadow-slate-200" />
-                </>
-              )}
-            </div>
-          </div>
-
+        {/* --- WELCOME MESSAGE --- */}
+        <div className="px-5 mt-2">
           {isLocationLoading ? (
-            <div className="mt-5 space-y-2">
+            <div className="space-y-2">
               <SkeletonText className="w-48 h-8" />
               <SkeletonText className="w-64 h-4" />
             </div>
           ) : (
             <>
-              <h1 className="mt-5 text-2xl font-extrabold" style={{ color: THEME.ink }}>
-                Hi, Sumit <span className="inline-block animate-bounce">👋</span>
+              <h1 className="text-2xl font-extrabold" style={{ color: THEME.ink }}>
+                Hi, {userName} <span className="inline-block animate-bounce">👋</span>
               </h1>
               <p className="mt-0.5 text-sm text-slate-500 font-medium">
                 Discover amazing deals near you
               </p>
             </>
           )}
-        </header>
+        </div>
 
         {/* --- MODERN SEARCH BAR --- */}
         <div className="mt-3 flex items-center gap-3 px-5">
@@ -549,7 +546,6 @@ export default function HomePage() {
                         <span className="rounded-lg bg-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-lg shadow-red-500/30">LIVE</span>
                         <span className="flex items-center gap-1 rounded-lg bg-black/60 backdrop-blur-md px-2.5 py-1 text-[10px] font-medium text-white"><Clock size={12} /> {item.timeLeft}</span>
                       </div>
-                      {/* <button className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-md shadow-md hover:bg-white transition-colors"><Heart size={15} className="text-slate-600" /></button> */}
                       <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-white text-[10px]"><Users size={12} /> {item.watching} watching</div>
                     </div>
                     <div className="p-4 flex flex-col h-[112px] justify-between">
