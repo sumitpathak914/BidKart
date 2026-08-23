@@ -1,0 +1,8 @@
+{
+  "appId": "com.bidkart.app",
+  "appName": "BidKart",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -29,6 +29,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   // Login State
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -60,11 +61,17 @@ export default function LoginPage() {
     if (savedUser && token) {
       navigate("/home");
     }
+    
+    // Hide splash screen after 2 seconds
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, [navigate]);
 
   // Login Handler
   const handleLogin = async (e) => {
-    debugger;
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -79,11 +86,9 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Save user data and token to localStorage
         localStorage.setItem("bidkart_user", JSON.stringify(data.data));
         localStorage.setItem("bidkart_token", data.data.token);
 
-        // Store user role for later use
         const userRole = data.data.user.role || data.data.userType || null;
         localStorage.setItem("bidkart_user_role", userRole);
 
@@ -105,7 +110,29 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const payload = role === "customer" ? customerData : businessData;
+    let payload;
+    
+    if (role === "customer") {
+      payload = {
+        name: customerData.name,
+        email: customerData.email,
+        mobile: customerData.mobile,
+        password: customerData.password,
+        role: "customer"
+      };
+    } else {
+      payload = {
+        name: businessData.name,
+        email: businessData.email,
+        mobile: businessData.mobile,
+        password: businessData.password,
+        role: "business",
+        businessName: businessData.businessName,
+        panNumber: businessData.panNumber,
+        gstNumber: businessData.gstNumber,
+        businessAddress: businessData.businessAddress
+      };
+    }
 
     try {
       const response = await fetch(`${API_URL}/register`, {
@@ -117,13 +144,9 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Save user data and token to localStorage
         localStorage.setItem("bidkart_user", JSON.stringify(data.data));
         localStorage.setItem("bidkart_token", data.data.token);
-
-        // Store user role
-        const userRole = role;
-        localStorage.setItem("bidkart_user_role", userRole);
+        localStorage.setItem("bidkart_user_role", role);
 
         alert("Registration successful!");
         navigate("/");
@@ -136,6 +159,22 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  // Splash Screen
+  if (showSplash) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: THEME.ink }}>
+        <div className="text-center">
+          <div className="w-32 h-32 bg-[#D9A441] rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+            <span className="text-5xl font-extrabold text-white">B</span>
+          </div>
+          <h1 className="text-4xl font-extrabold text-white mb-2">BidKart</h1>
+          <div className="w-16 h-1 bg-[#D9A441] mx-auto rounded-full"></div>
+          <p className="text-white/70 mt-4 text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F6F5F1] flex items-center justify-center p-4">
