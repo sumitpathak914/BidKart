@@ -17,7 +17,10 @@ import { getToken, getUser, isLoggedIn, logoutUser } from "./userSession";
 // Import LocationHeader component
 import LocationHeader from "./LocationHeader";
 // Import location store
-import { getLocation, setLocation, updateLocationFromCoords } from "./locationStore";
+import {
+  getLocation,
+  updateLocationFromCoords
+} from "./locationStore";
 
 const THEME = {
   ink: "#0F1638",
@@ -121,7 +124,7 @@ const getCurrentLocation = () => {
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 0,
-      }
+      },
     );
   });
 };
@@ -130,15 +133,20 @@ const getCurrentLocation = () => {
 const getLocationDetails = async (lat, lng) => {
   try {
     const response = await axios.get(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`,
     );
 
     if (response.data && response.data.address) {
       const address = response.data.address;
-      const city = address.city || address.town || address.village || address.municipality || "";
+      const city =
+        address.city ||
+        address.town ||
+        address.village ||
+        address.municipality ||
+        "";
       const state = address.state || address.region || "";
       const country = address.country || "";
-      
+
       return { city, state, country };
     }
     throw new Error("Unable to get location details");
@@ -168,13 +176,15 @@ export default function ExplorePage() {
   // Fetch active categories from API
   const fetchActiveCategories = async () => {
     try {
-      const response = await axios.get(`http://test.aakarcanvassing.com/api/categories/active`);
-      
+      const response = await axios.get(
+        `https://test.aakarcanvassing.com/api/categories/active`,
+      );
+
       if (response.data.success && response.data.data) {
         // Add "All" category at the beginning
         const allCategories = [
           { id: "all", name: "All", categoryId: null },
-          ...response.data.data
+          ...response.data.data,
         ];
         setCategories(allCategories);
       }
@@ -210,7 +220,7 @@ export default function ExplorePage() {
         city: userCity,
         state: userState,
       };
-      
+
       // Only add category if it's not "all"
       if (categoryId !== "all") {
         params.category = categoryId;
@@ -257,7 +267,7 @@ export default function ExplorePage() {
       } else {
         setError(
           err.response?.data?.message ||
-            "Unable to load shops. Please try again."
+            "Unable to load shops. Please try again.",
         );
       }
       setShops([]);
@@ -274,7 +284,7 @@ export default function ExplorePage() {
     try {
       // First check if location exists in store
       const storedLocation = getLocation();
-      
+
       if (storedLocation.city && storedLocation.state) {
         console.log("Using stored location in ExplorePage:", storedLocation);
         setUserCity(storedLocation.city);
@@ -289,20 +299,23 @@ export default function ExplorePage() {
       console.log("Current location:", location);
 
       // Update location in store
-      const updatedLocation = await updateLocationFromCoords(location.lat, location.lng);
-      
+      const updatedLocation = await updateLocationFromCoords(
+        location.lat,
+        location.lng,
+      );
+
       setUserCity(updatedLocation.city);
       setUserState(updatedLocation.state);
 
       // Now fetch shops with the location
       await fetchNearbyShops(categoryId);
-      
     } catch (err) {
       console.error("Error getting location:", err);
-      
+
       let errorMessage = "Unable to get your location. ";
       if (err.code === 1) {
-        errorMessage += "Please allow location access in your browser settings.";
+        errorMessage +=
+          "Please allow location access in your browser settings.";
       } else if (err.code === 2) {
         errorMessage += "Location unavailable. Please check your GPS.";
       } else if (err.code === 3) {
@@ -310,7 +323,7 @@ export default function ExplorePage() {
       } else {
         errorMessage += "Please try again or enter your location manually.";
       }
-      
+
       setError(errorMessage);
       setIsGettingLocation(false);
       setIsLoading(false);
@@ -337,7 +350,7 @@ export default function ExplorePage() {
       await fetchActiveCategories();
       await getUserLocationAndFetchShops(activeFilter);
     };
-    
+
     initialize();
   }, []);
 
@@ -376,7 +389,10 @@ export default function ExplorePage() {
             </div>
             <div className="mt-4 flex gap-2 overflow-x-auto px-0 pb-1">
               {[1, 2, 3, 4, 5].map((i) => (
-                <SkeletonBox key={i} className="w-24 h-9 rounded-full flex-shrink-0" />
+                <SkeletonBox
+                  key={i}
+                  className="w-24 h-9 rounded-full flex-shrink-0"
+                />
               ))}
             </div>
           </header>
@@ -413,7 +429,6 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen bg-[rgb(246,245,241)] pb-24">
       <div className="mx-auto max-w-md">
-        
         {/* Location Header - Replacing the old header */}
         <LocationHeader
           userCity={userCity}
@@ -557,7 +572,9 @@ export default function ExplorePage() {
             {shops.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-2xl shadow-sm">
                 <Store size={56} className="mx-auto mb-4 text-slate-300" />
-                <p className="text-base font-semibold text-slate-600">No shops found</p>
+                <p className="text-base font-semibold text-slate-600">
+                  No shops found
+                </p>
                 <p className="text-sm text-slate-400 mt-1">
                   Try changing your filter or location
                 </p>
@@ -586,7 +603,8 @@ export default function ExplorePage() {
                         />
                         <span className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-[10px] font-bold text-[#0F1638] shadow-sm">
                           <MapPin size={10} className="inline mr-1" />
-                          {shop.distance || `${(Math.random() * 2 + 0.5).toFixed(1)} km`}
+                          {shop.distance ||
+                            `${(Math.random() * 2 + 0.5).toFixed(1)} km`}
                         </span>
                         <span
                           className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
@@ -616,7 +634,9 @@ export default function ExplorePage() {
                           </div>
                           <p className="text-[11px] text-slate-400 truncate flex items-center gap-1 mt-0.5">
                             <MapPin size={12} className="flex-shrink-0" />
-                            {shop.business_address || shop.address || "Local shop"}
+                            {shop.business_address ||
+                              shop.address ||
+                              "Local shop"}
                           </p>
                         </div>
                         <button
