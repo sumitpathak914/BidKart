@@ -394,8 +394,9 @@ export default function ExplorePage() {
     "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&q=80";
 
   return (
-    <div className="min-h-screen bg-[#F6F5F1] pb-24">
+    <div className="min-h-screen bg-[rgb(246,245,241)] pb-24">
       <div className="mx-auto max-w-md">
+        
         {/* Header */}
         <header className="px-5 pt-6">
           <div className="flex items-start justify-between">
