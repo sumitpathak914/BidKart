@@ -954,62 +954,12 @@ const renderAccountOptions = () => (
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100">
-          {isBusiness ? (
-            <>
-              <div className="text-center">
-                <p className="text-xl font-bold text-[#0F1638]">
-                  {profile.listings}
-                </p>
-                <p className="text-xs text-slate-500">Active Listings</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-bold text-[#0F1638]">
-                  {profile.bids}
-                </p>
-                <p className="text-xs text-slate-500">Bids Placed</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-0.5">
-                  <p className="text-xl font-bold text-[#0F1638]">
-                    {profile.rating}
-                  </p>
-                  <Star size={16} className="fill-[#D9A441] text-[#D9A441]" />
-                </div>
-                <p className="text-xs text-slate-500">Ratings</p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="text-center">
-                <p className="text-xl font-bold text-[#0F1638]">
-                  {profile.wonAuctions}
-                </p>
-                <p className="text-xs text-slate-500">Won Auctions</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-bold text-[#0F1638]">
-                  {profile.bidsPlaced}
-                </p>
-                <p className="text-xs text-slate-500">Bids Placed</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-0.5">
-                  <p className="text-xl font-bold text-[#0F1638]">
-                    {profile.rating}
-                  </p>
-                  <Star size={16} className="fill-[#D9A441] text-[#D9A441]" />
-                </div>
-                <p className="text-xs text-slate-500">Rating</p>
-              </div>
-            </>
-          )}
-        </div>
+        
 
-        <button className="w-full mt-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-[#0F1638] hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+        {/* <button className="w-full mt-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-[#0F1638] hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
           <Edit2 size={16} />
           Edit Profile
-        </button>
+        </button> */}
       </div>
     );
   };

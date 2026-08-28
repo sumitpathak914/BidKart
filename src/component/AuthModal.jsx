@@ -1,16 +1,20 @@
+// src/LoginPage.jsx
 import {
-    Briefcase,
-    Eye,
-    EyeOff,
-    Lock,
-    LogIn,
-    Mail,
-    MapPin,
-    User,
-    UserPlus,
+  Briefcase,
+  Eye,
+  EyeOff,
+  Lock,
+  LogIn,
+  Mail,
+  MapPin,
+  User,
+  UserPlus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+// Firebase मधून Token फंक्शन import करा
+import { getDeviceToken } from "../Context/firebase";
 
 const THEME = {
   ink: "#0F1638",
@@ -30,6 +34,9 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [fcmToken, setFcmToken] = useState(""); // For debugging
+  const [showToken, setShowToken] = useState(false); // Toggle token visibility
+  const [tokenError, setTokenError] = useState(""); // Store token errors
 
   // Login State
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -61,7 +68,7 @@ export default function LoginPage() {
     if (savedUser && token) {
       navigate("/home");
     }
-    
+
     // Hide splash screen after 2 seconds
     const timer = setTimeout(() => {
       setShowSplash(false);
@@ -70,56 +77,299 @@ export default function LoginPage() {
     return () => clearTimeout(timer);
   }, [navigate]);
 
-  // Login Handler
+  // 🔥 Get and print FCM Token on component mount with better error handling
+  useEffect(() => {
+    const getAndPrintToken = async () => {
+      try {
+        console.log("🔄 Getting FCM Token...");
+        console.log("📋 Checking if getDeviceToken function exists:", typeof getDeviceToken);
+        console.log("📋 getDeviceToken function:", getDeviceToken);
+        
+        // Check if Firebase is initialized
+        try {
+          const token = await getDeviceToken();
+          
+          if (token && token !== null && token !== undefined && token !== "") {
+            setFcmToken(token);
+            setTokenError("");
+            console.log("✅ FCM Token retrieved successfully!");
+            console.log("📱 FCM Token:", token);
+            console.log("📏 Token Length:", token.length);
+            console.log("📋 Token Type:", typeof token);
+            console.log("📋 First 20 chars:", token.substring(0, 20) + "...");
+            
+            // Print token in a formatted way
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            console.log("🔥 FCM DEVICE TOKEN");
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            console.log(token);
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+          } else {
+            setFcmToken("");
+            setTokenError("Token is null or empty");
+            console.warn("⚠️ No FCM Token received - token is null, undefined, or empty");
+            console.warn("⚠️ Token value:", token);
+            console.warn("⚠️ Token type:", typeof token);
+            
+            // Log Firebase availability
+            console.warn("⚠️ Checking Firebase availability...");
+            try {
+              const firebaseModule = await import("../Context/firebase");
+              console.log("📋 Firebase module:", Object.keys(firebaseModule));
+            } catch (importError) {
+              console.error("❌ Cannot import firebase module:", importError);
+            }
+          }
+        } catch (tokenError) {
+          setFcmToken("");
+          setTokenError(`Error: ${tokenError.message || "Unknown error"}`);
+          console.error("❌ Error getting FCM Token:", tokenError);
+          console.error("❌ Error details:", tokenError.message);
+          console.error("❌ Error stack:", tokenError.stack);
+          
+          // Check if this is a permission issue
+          if (tokenError.message && tokenError.message.includes("permission")) {
+            console.error("🔴 This looks like a permission issue. Check Firebase configuration.");
+          }
+          if (tokenError.message && tokenError.message.includes("not initialized")) {
+            console.error("🔴 Firebase may not be initialized properly.");
+          }
+        }
+      } catch (outerError) {
+        console.error("❌ Outer error in getAndPrintToken:", outerError);
+        setTokenError(`Fatal error: ${outerError.message}`);
+      }
+    };
+
+    getAndPrintToken();
+  }, []);
+
+  // 🔥 Function to manually fetch and print FCM Token with better error handling
+  const handlePrintFCMToken = async () => {
+    try {
+      console.log("🔄 Manual FCM Token fetch...");
+      console.log("📋 Environment check:");
+      console.log("  - getDeviceToken exists:", typeof getDeviceToken);
+      console.log("  - navigator:", navigator ? "Available" : "Not available");
+      console.log("  - navigator.clipboard:", navigator.clipboard ? "Available" : "Not available");
+      
+      setLoading(true);
+      setTokenError("");
+      
+      // Try to get token with detailed logging
+      console.log("📋 Attempting to get token...");
+      const token = await getDeviceToken();
+      console.log("📋 Raw token value:", token);
+      console.log("📋 Token type:", typeof token);
+      console.log("📋 Is token empty?", token === "" || token === null || token === undefined);
+      
+      if (token && token !== null && token !== undefined && token !== "") {
+        setFcmToken(token);
+        setTokenError("");
+        console.log("✅ FCM Token fetched manually!");
+        console.log("📱 FCM Token:", token);
+        console.log("📏 Token Length:", token.length);
+        console.log("📋 First 20 chars:", token.substring(0, 20) + "...");
+        
+        // Show in alert for easy copy
+        alert(`FCM Token:\n\n${token}\n\nToken Length: ${token.length} characters`);
+        
+        // Also copy to clipboard if available
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(token);
+            console.log("📋 Token copied to clipboard!");
+          } catch (clipError) {
+            console.warn("Could not copy to clipboard:", clipError);
+            // Try fallback method
+            try {
+              // Fallback for older browsers
+              const textArea = document.createElement('textarea');
+              textArea.value = token;
+              document.body.appendChild(textArea);
+              textArea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textArea);
+              console.log("📋 Token copied using fallback method!");
+            } catch (fallbackError) {
+              console.warn("Fallback copy also failed:", fallbackError);
+            }
+          }
+        } else {
+          console.warn("Clipboard API not available. Please copy manually.");
+        }
+      } else {
+        setFcmToken("");
+        setTokenError("Failed to get token - it's null or empty");
+        alert(`❌ Failed to get FCM Token.\n\nToken value: ${token}\nToken type: ${typeof token}\n\nCheck console for more details.`);
+        console.error("❌ getDeviceToken returned invalid value:", token);
+        console.error("❌ Token type:", typeof token);
+        
+        // Additional debugging
+        console.log("📋 Attempting to load firebase module directly...");
+        try {
+          const firebaseModule = await import("../Context/firebase");
+          console.log("📋 Firebase module loaded. Available functions:", Object.keys(firebaseModule));
+          
+          // Try to access getDeviceToken again
+          if (firebaseModule.getDeviceToken) {
+            console.log("📋 getDeviceToken found in module. Trying again...");
+            const retryToken = await firebaseModule.getDeviceToken();
+            console.log("📋 Retry token:", retryToken);
+          } else {
+            console.error("❌ getDeviceToken not found in firebase module");
+          }
+        } catch (importError) {
+          console.error("❌ Cannot import firebase module for debugging:", importError);
+        }
+      }
+    } catch (error) {
+      setFcmToken("");
+      setTokenError(`Error: ${error.message || "Unknown error"}`);
+      console.error("❌ Error in handlePrintFCMToken:", error);
+      console.error("❌ Error stack:", error.stack);
+      
+      // Specific error handling
+      let errorMsg = `Error getting token: ${error.message}`;
+      if (error.message && error.message.includes("permission")) {
+        errorMsg += "\n\nThis appears to be a permission issue. Check Firebase configuration.";
+      }
+      if (error.message && error.message.includes("initialize")) {
+        errorMsg += "\n\nFirebase may not be initialized. Check your firebase.js configuration.";
+      }
+      if (error.message && error.message.includes("messaging")) {
+        errorMsg += "\n\nFirebase Messaging may not be available. Check your browser permissions.";
+      }
+      alert(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Login Handler with FCM Token logging
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("🔐 LOGIN ATTEMPT");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      
+      // १. सर्वात आधी Device Token Generate करा
+      console.log("🔄 Generating device token for login...");
+      let deviceToken = null;
+      try {
+        deviceToken = await getDeviceToken();
+        console.log("📱 FCM Token for Login:", deviceToken);
+        console.log("📏 Token Length:", deviceToken?.length || 0);
+      } catch (tokenError) {
+        console.error("⚠️ Could not get device token:", tokenError);
+        // Continue with login even if token fails
+      }
+      
+      if (!deviceToken) {
+        console.warn("⚠️ Warning: Device token is empty/null - continuing without token");
+      }
+
+      // २. Login Payload मध्ये deviceToken जोडा (only if available)
+      const payload = {
+        email: loginData.email,
+        password: loginData.password,
+        ...(deviceToken && { deviceToken: deviceToken }), // Only add if exists
+      };
+
+      console.log("📤 Login Payload:", {
+        email: payload.email,
+        password: "***HIDDEN***",
+        hasDeviceToken: !!deviceToken,
+        deviceTokenPreview: deviceToken ? `${deviceToken.substring(0, 20)}...` : "null"
+      });
+
+      // ३. API ला Request पाठवा
+      console.log("🔄 Sending login request to server...");
       const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(loginData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
+      console.log("📥 Server Response:", data);
 
       if (data.success) {
-        localStorage.setItem("bidkart_user", JSON.stringify(data.data));
+        console.log("✅ Login successful!");
+        
+        // ४. User Object store करा
+        localStorage.setItem("bidkart_user", JSON.stringify(data.data.user));
+        console.log("👤 User stored:", data.data.user.email);
+
+        // ५. JWT Token store करा
         localStorage.setItem("bidkart_token", data.data.token);
+        console.log("🔑 JWT Token stored");
 
-        const userRole = data.data.user.role || data.data.userType || null;
+        // ६. Role store करा
+        const userRole = data.data.user.role || data.data.userType || "customer";
         localStorage.setItem("bidkart_user_role", userRole);
+        console.log("🎭 User Role:", userRole);
 
-        alert("Login successful!");
+        alert("✅ Login successful!");
         navigate("/home");
       } else {
+        console.error("❌ Login failed:", data.message);
         setError(data.message || "Invalid credentials");
       }
     } catch (err) {
+      console.error("❌ Login Error:", err);
+      console.error("Error Stack:", err.stack);
       setError("Unable to connect to server. Please try again.");
     } finally {
       setLoading(false);
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     }
   };
 
-  // Register Handler
+  // ✅ Register Handler with FCM Token logging
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("📝 REGISTRATION ATTEMPT");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("👤 Role:", role);
+
+    // Get FCM Token for registration (try but don't fail if not available)
+    console.log("🔄 Getting FCM token for registration...");
+    let deviceToken = null;
+    try {
+      deviceToken = await getDeviceToken();
+      console.log("📱 FCM Token for Registration:", deviceToken);
+      console.log("📏 Token Length:", deviceToken?.length || 0);
+    } catch (tokenError) {
+      console.error("⚠️ Failed to get FCM token (continuing):", tokenError.message);
+    }
+
     let payload;
-    
+
     if (role === "customer") {
       payload = {
         name: customerData.name,
         email: customerData.email,
         mobile: customerData.mobile,
         password: customerData.password,
-        role: "customer"
+        role: "customer",
+        ...(deviceToken && { deviceToken: deviceToken }), // Only add if exists
       };
+      console.log("📝 Customer Registration Data:", {
+        name: payload.name,
+        email: payload.email,
+        mobile: payload.mobile,
+        role: payload.role,
+        hasDeviceToken: !!payload.deviceToken
+      });
     } else {
       payload = {
         name: businessData.name,
@@ -130,11 +380,20 @@ export default function LoginPage() {
         businessName: businessData.businessName,
         panNumber: businessData.panNumber,
         gstNumber: businessData.gstNumber,
-        businessAddress: businessData.businessAddress
+        businessAddress: businessData.businessAddress,
+        ...(deviceToken && { deviceToken: deviceToken }), // Only add if exists
       };
+      console.log("📝 Business Registration Data:", {
+        name: payload.name,
+        email: payload.email,
+        businessName: payload.businessName,
+        role: payload.role,
+        hasDeviceToken: !!payload.deviceToken
+      });
     }
 
     try {
+      console.log("🔄 Sending registration request...");
       const response = await fetch(`${API_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -142,28 +401,38 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
+      console.log("📥 Registration Response:", data);
 
       if (data.success) {
-        localStorage.setItem("bidkart_user", JSON.stringify(data.data));
+        console.log("✅ Registration successful!");
+        localStorage.setItem("bidkart_user", JSON.stringify(data.data.user));
         localStorage.setItem("bidkart_token", data.data.token);
         localStorage.setItem("bidkart_user_role", role);
+        console.log("👤 User stored with role:", role);
 
-        alert("Registration successful!");
+        alert("✅ Registration successful!");
         navigate("/");
       } else {
+        console.error("❌ Registration failed:", data.message);
         setError(data.message || "Registration failed");
       }
     } catch (err) {
+      console.error("❌ Registration Error:", err);
+      console.error("Error Stack:", err.stack);
       setError("Unable to connect to server. Please try again.");
     } finally {
       setLoading(false);
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     }
   };
 
   // Splash Screen
   if (showSplash) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: THEME.ink }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: THEME.ink }}
+      >
         <div className="text-center">
           <div className="w-32 h-32 bg-[#D9A441] rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
             <span className="text-5xl font-extrabold text-white">B</span>
@@ -206,6 +475,91 @@ export default function LoginPage() {
 
         {/* Body */}
         <div className="p-6">
+          {/* 🔥 FCM Token Debug Section - Enhanced */}
+          <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🔥</span>
+                <span className="text-xs font-bold text-blue-700">FCM TOKEN DEBUG</span>
+              </div>
+              <button
+                onClick={() => setShowToken(!showToken)}
+                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+              >
+                {showToken ? "Hide" : "Show"}
+              </button>
+            </div>
+            
+            {showToken && (
+              <div className="mb-2">
+                <div className="bg-white p-2 rounded-lg text-xs text-gray-600 break-all font-mono border border-blue-100 min-h-[40px]">
+                  {fcmToken ? (
+                    fcmToken
+                  ) : (
+                    <span className="text-red-500">
+                      {tokenError || "No token available"}
+                    </span>
+                  )}
+                </div>
+                <div className="text-[10px] text-gray-500 mt-1 flex justify-between">
+                  <span>Length: {fcmToken?.length || 0} characters</span>
+                  {tokenError && (
+                    <span className="text-red-500 font-medium">⚠️ {tokenError}</span>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={handlePrintFCMToken}
+                disabled={loading}
+                className="flex-1 py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-all disabled:opacity-50 min-w-[100px]"
+              >
+                {loading ? "⏳ Loading..." : "🖨️ Print Token"}
+              </button>
+              {fcmToken && (
+                <button
+                  onClick={() => {
+                    if (navigator.clipboard?.writeText) {
+                      navigator.clipboard.writeText(fcmToken);
+                      alert("✅ Token copied to clipboard!");
+                    } else {
+                      // Fallback
+                      const textArea = document.createElement('textarea');
+                      textArea.value = fcmToken;
+                      document.body.appendChild(textArea);
+                      textArea.select();
+                      document.execCommand('copy');
+                      document.body.removeChild(textArea);
+                      alert("✅ Token copied to clipboard!");
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-all"
+                >
+                  📋 Copy
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  console.clear();
+                  console.log("🧹 Console cleared. Check for token errors:");
+                  console.log("📋 Current token state:", fcmToken || "No token");
+                  console.log("📋 Token error:", tokenError || "None");
+                  handlePrintFCMToken();
+                }}
+                className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-lg transition-all"
+              >
+                🔄 Retry
+              </button>
+            </div>
+            
+            {/* Quick troubleshooting tips */}
+            <div className="mt-2 text-[10px] text-blue-600">
+              💡 Tips: Check console (F12) for detailed logs • Make sure Firebase is configured • Check browser permissions
+            </div>
+          </div>
+
           {/* Role Toggle (Only for register) */}
           {mode === "register" && (
             <div className="flex gap-2 p-1 bg-slate-100 rounded-xl mb-4">
@@ -239,7 +593,7 @@ export default function LoginPage() {
           {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-sm text-red-600">
-              {error}
+              ❌ {error}
             </div>
           )}
 

@@ -222,10 +222,10 @@ export default function ExplorePage() {
       };
 
       // Only add category if it's not "all"
-      if (categoryId !== "all") {
-        params.category = categoryId;
-      }
-
+     const categoryParam = categoryId === "all" ? undefined : categories.find(c => c.id.toString() === categoryId)?.name;
+if (categoryParam) {
+  params.category = categoryParam; // send name
+}
       const response = await axios.get(`${API_BASE_URL}/api/auth/nearby`, {
         headers: {
           Authorization: `Bearer ${currentToken}`,

@@ -1,21 +1,21 @@
-// BusinessProfilePage.jsx - Complete Working Version with Image Display Fix
+// BusinessProfilePage.jsx - with Category Dropdown for Business Type
 import {
-    AlertCircle,
-    Building2,
-    Calendar,
-    CheckCircle,
-    Clock,
-    Edit2,
-    Globe,
-    Image,
-    Mail,
-    MapPin,
-    Phone,
-    Save,
-    Share2,
-    ShieldCheck,
-    Store,
-    X
+  AlertCircle,
+  Building2,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Edit2,
+  Globe,
+  Image,
+  Mail,
+  MapPin,
+  Phone,
+  Save,
+  Share2,
+  ShieldCheck,
+  Store,
+  X
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -34,6 +34,10 @@ export default function BusinessProfilePage() {
   const [selectedTab, setSelectedTab] = useState("about");
   const [isOwner, setIsOwner] = useState(false);
   const [error, setError] = useState(null);
+
+  // Categories for business type dropdown
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   // File upload refs
   const logoInputRef = useRef(null);
@@ -71,14 +75,39 @@ export default function BusinessProfilePage() {
   // Helper function to get image URL
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
-    // Check if it's already a full URL
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    // Fix Windows path format for URL
     const cleanPath = imagePath.replace(/\\/g, "/");
     return `${API_URL}/${cleanPath}`;
   };
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const token = getToken();
+        const res = await fetch("https://test.aakarcanvassing.com/api/categories/active", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          setCategories(data.data);
+        } else {
+          console.warn("Failed to load categories:", data);
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Fetch business profile
   useEffect(() => {
@@ -98,7 +127,6 @@ export default function BusinessProfilePage() {
         setLoading(true);
         setError(null);
 
-        // If shopId is provided, fetch that specific business
         let url = `${API_URL}/auth/profile`;
         if (shopId) {
           url += `?shopId=${shopId}`;
@@ -122,19 +150,16 @@ export default function BusinessProfilePage() {
           const user = data.data;
           setUserData(user);
 
-          // Check if user owns this shop
           if (shopId) {
             setIsOwner(user.id === parseInt(shopId));
           } else {
             setIsOwner(true);
           }
 
-          // Set business details
           if (user.businessDetails) {
             const biz = user.businessDetails;
             setBusinessDetails(biz);
 
-            // Set form data with all fields
             setFormData({
               businessName: biz.business_name || "",
               businessType: biz.business_type || "",
@@ -157,7 +182,6 @@ export default function BusinessProfilePage() {
               businessPhone: biz.business_phone || user.mobile || "",
             });
 
-            // Set image previews using helper function
             setLogoPreview(getImageUrl(biz.logo));
             setCoverPreview(getImageUrl(biz.cover_image));
           }
@@ -212,10 +236,8 @@ export default function BusinessProfilePage() {
     try {
       const token = getToken();
 
-      // Create FormData
       const formDataToSend = new FormData();
 
-      // Add all text fields - match backend field names
       formDataToSend.append("business_name", formData.businessName || "");
       formDataToSend.append("business_type", formData.businessType || "");
       formDataToSend.append("about", formData.about || "");
@@ -230,11 +252,8 @@ export default function BusinessProfilePage() {
       formDataToSend.append("opening_time", formData.openingTime || "09:00");
       formDataToSend.append("closing_time", formData.closingTime || "18:00");
       formDataToSend.append("established_year", formData.establishedYear || "");
-
-      // Add email
       formDataToSend.append("email", formData.email || "");
 
-      // Add files
       if (logoFile) {
         formDataToSend.append("logo", logoFile);
       }
@@ -242,7 +261,6 @@ export default function BusinessProfilePage() {
         formDataToSend.append("cover_image", coverFile);
       }
 
-      // Use the shop ID from params or user data
       const targetId = shopId || userData?.id;
 
       if (!targetId) {
@@ -261,21 +279,19 @@ export default function BusinessProfilePage() {
             Authorization: `Bearer ${token}`,
           },
           body: formDataToSend,
-        },
+        }
       );
 
       const data = await response.json();
       console.log("Update Response:", data);
 
       if (data.success) {
-        // Update local state with new data
         const updatedBiz = data.data || formData;
         setBusinessDetails(updatedBiz);
         setIsEditing(false);
         setLogoFile(null);
         setCoverFile(null);
         alert("Profile updated successfully!");
-        // Refresh data
         window.location.reload();
       } else {
         alert(data.message || "Failed to update profile");
@@ -312,7 +328,6 @@ export default function BusinessProfilePage() {
         businessPhone: biz.business_phone || userData?.mobile || "",
       });
 
-      // Reset image previews using helper function
       setLogoPreview(getImageUrl(biz.logo));
       setCoverPreview(getImageUrl(biz.cover_image));
     }
@@ -440,7 +455,6 @@ export default function BusinessProfilePage() {
                 onError={(e) => {
                   console.error("Cover image failed to load:", coverPreview);
                   e.target.style.display = "none";
-                  // Show fallback
                   const parent = e.target.parentElement;
                   const fallback = document.createElement('div');
                   fallback.className = "w-full h-full bg-gradient-to-r from-[#0F1638] to-[#1f2d5e] flex items-center justify-center";
@@ -484,7 +498,6 @@ export default function BusinessProfilePage() {
                   onError={(e) => {
                     console.error("Logo image failed to load:", logoPreview);
                     e.target.style.display = "none";
-                    // Show fallback
                     const parent = e.target.parentElement;
                     parent.innerHTML = `
                       <div class="w-full h-full bg-[#FDF3E1] flex items-center justify-center">
@@ -612,23 +625,31 @@ export default function BusinessProfilePage() {
 
                 {isOwner && isEditing && (
                   <>
+                    {/* BUSINESS TYPE - NOW A DROPDOWN */}
                     <div>
                       <label className="text-xs font-semibold text-slate-600">
                         Business Type
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={formData.businessType}
                         onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            businessType: e.target.value,
-                          })
+                          setFormData({ ...formData, businessType: e.target.value })
                         }
-                        className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#D9A441] transition-colors"
-                        placeholder="e.g., Retail, Manufacturing, Service"
-                      />
+                        className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#D9A441] transition-colors bg-white"
+                        disabled={categoriesLoading}
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                      {categoriesLoading && (
+                        <p className="text-xs text-slate-400 mt-1">Loading categories…</p>
+                      )}
                     </div>
+
                     <div>
                       <label className="text-xs font-semibold text-slate-600">
                         PAN Number

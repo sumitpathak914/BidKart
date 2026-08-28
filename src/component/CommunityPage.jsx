@@ -103,6 +103,166 @@ const PostSkeleton = () => (
   </div>
 );
 
+// ==================== VIDEO PLAYER COMPONENT ====================
+const VideoPlayer = ({ src, onClose, onModalOpenChange }) => {
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleTimeUpdate = () => {
+      const progress = (video.currentTime / video.duration) * 100;
+      setProgress(progress);
+      setCurrentTime(video.currentTime);
+    };
+
+    const handleLoadedMetadata = () => {
+      setDuration(video.duration);
+    };
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setProgress(0);
+      setCurrentTime(0);
+      video.currentTime = 0;
+    };
+
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+    video.addEventListener('ended', handleEnded);
+
+    // Auto play
+    video.play().catch(() => {
+      // Auto-play was prevented, user needs to interact
+      setIsPlaying(false);
+    });
+
+    // Notify parent that modal is open
+    if (onModalOpenChange) {
+      onModalOpenChange(true);
+    }
+
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+      video.removeEventListener('ended', handleEnded);
+      video.pause();
+      
+      // Notify parent that modal is closed
+      if (onModalOpenChange) {
+        onModalOpenChange(false);
+      }
+    };
+  }, []);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play();
+    }
+  };
+
+  const handleProgressClick = (e) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const newTime = x * video.duration;
+    video.currentTime = newTime;
+    setProgress(x * 100);
+  };
+
+  const formatTime = (seconds) => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center"
+      onClick={onClose}
+    >
+      <div 
+        className="relative w-full max-w-2xl mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+        >
+          <X size={24} />
+        </button>
+
+        {/* Video container */}
+        <div className="relative bg-black rounded-lg overflow-hidden">
+          <video
+            ref={videoRef}
+            src={src}
+            className="w-full max-h-[70vh] object-contain"
+            onClick={togglePlay}
+            playsInline
+          />
+
+          {/* Video controls overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+            {/* Progress bar */}
+            <div 
+              className="relative w-full h-1 bg-gray-600 rounded-full cursor-pointer mb-2"
+              onClick={handleProgressClick}
+            >
+              <div 
+                className="absolute left-0 top-0 h-full bg-[#D9A441] rounded-full transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={togglePlay}
+                  className="text-white hover:text-[#D9A441] transition-colors"
+                >
+                  {isPlaying ? (
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                    </svg>
+                  ) : (
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  )}
+                </button>
+                <span className="text-white text-sm">
+                  {formatTime(currentTime)} / {formatTime(duration)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function CommunityPage({ onModalOpenChange }) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -141,6 +301,10 @@ export default function CommunityPage({ onModalOpenChange }) {
 
   // --- Like State ---
   const [likingPostId, setLikingPostId] = useState(null);
+
+  // --- Video Player State ---
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [videoUrl, setVideoUrl] = useState('');
 
   // --- Intersection Observer Ref ---
   const observerRef = useRef(null);
@@ -573,6 +737,9 @@ export default function CommunityPage({ onModalOpenChange }) {
       if (showCommentsModal && onModalOpenChange) {
         onModalOpenChange(false);
       }
+      if (showVideoPlayer && onModalOpenChange) {
+        onModalOpenChange(false);
+      }
     };
   }, []);
 
@@ -759,7 +926,7 @@ export default function CommunityPage({ onModalOpenChange }) {
                   {post.content}
                 </p>
 
-                {/* Post Images */}
+                {/* Post Images - Updated with Video Support */}
                 {post.media_urls && post.media_urls.length > 0 && (
                   <div
                     className={`mt-2 grid ${post.media_urls.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-1.5`}
@@ -767,14 +934,42 @@ export default function CommunityPage({ onModalOpenChange }) {
                     {post.media_urls.slice(0, 2).map((media, idx) => (
                       <div
                         key={idx}
-                        className="rounded-lg overflow-hidden bg-slate-100 h-32 cursor-pointer"
-                        onClick={() => window.open(media.url, "_blank")}
+                        className="rounded-lg overflow-hidden bg-slate-100 h-32 cursor-pointer relative group"
+                        onClick={() => {
+                          if (media.type === "video") {
+                            setVideoUrl(media.url);
+                            setShowVideoPlayer(true);
+                            if (onModalOpenChange) {
+                              onModalOpenChange(true);
+                            }
+                          } else {
+                            window.open(media.url, "_blank");
+                          }
+                        }}
                       >
                         {media.type === "video" ? (
-                          <video
-                            src={media.url}
-                            className="w-full h-full object-cover"
-                          />
+                          <>
+                            <video
+                              src={media.url}
+                              className="w-full h-full object-cover"
+                              onClick={(e) => e.stopPropagation()}
+                              muted
+                            />
+                            {/* Play button overlay for video */}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
+                              <div className="w-12 h-12 rounded-full bg-[#D9A441]/90 flex items-center justify-center shadow-lg">
+                                <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z"/>
+                                </svg>
+                              </div>
+                            </div>
+                            {/* Video duration badge */}
+                            {media.duration && (
+                              <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
+                                {media.duration}
+                              </div>
+                            )}
+                          </>
                         ) : (
                           <img
                             src={media.url}
@@ -1126,6 +1321,21 @@ export default function CommunityPage({ onModalOpenChange }) {
 
       {/* Comments Modal */}
       {renderCommentsModal()}
+
+      {/* Video Player Modal */}
+      {showVideoPlayer && (
+        <VideoPlayer 
+          src={videoUrl}
+          onClose={() => {
+            setShowVideoPlayer(false);
+            setVideoUrl('');
+            if (onModalOpenChange) {
+              onModalOpenChange(false);
+            }
+          }}
+          onModalOpenChange={onModalOpenChange}
+        />
+      )}
     </div>
   );
 }
